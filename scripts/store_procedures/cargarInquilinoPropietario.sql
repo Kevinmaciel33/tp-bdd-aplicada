@@ -80,6 +80,9 @@ BEGIN
 
     DECLARE @FilasInsertadas INT = @@ROWCOUNT;
     PRINT 'Proceso de importación completado. Filas insertadas en dbo.persona: ' + CAST(@FilasInsertadas AS VARCHAR(10));
+	
+	DROP TABLE IF EXISTS #persona_staging;
+
 END
 create function corregirTexto (@texto varchar(50))
 returns varchar(50)
