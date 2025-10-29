@@ -88,7 +88,6 @@ CONSTRAINT PkProveedor PRIMARY KEY(IdProveedor)
 );
 go
 
-
 CREATE TABLE GastoOrdinario (
 
 IdGastoOrd INT NOT NULL IDENTITY(1,1),
@@ -153,5 +152,25 @@ CONSTRAINT Total CHECK(Total>0)
 
 );
 go
+
+CREATE TABLE Pago (
+
+IdPago INT NOT NULL IDENTITY(1,1),
+IdDetalleExp INT NOT NULL,
+IdUf INT NOT NULL,
+MesPago INT NOT NULL,
+FechaPago DATE NOT NULL, 
+Cuenta INT NOT NULL,
+Importe DECIMAL(10,2) NOT NULL,
+
+CONSTRAINT Pk_Pago PRIMARY KEY (IdPago),
+CONSTRAINT Fk_Pago_DetalleExp FOREIGN KEY (IdDetalleExp) REFERENCES DetalleExpensa(IdDetalle),
+CONSTRAINT Fk_Pago_Uf FOREIGN KEY (IdUf) REFERENCES UnidadFuncional(IdUf),
+CONSTRAINT Ck_MesPago CHECK (MesPago BETWEEN 1 AND 12),
+CONSTRAINT Ck_Importe CHECK (Importe > 0)
+
+);
+go
+
 
 
