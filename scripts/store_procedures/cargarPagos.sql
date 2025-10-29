@@ -63,6 +63,9 @@ BEGIN
 
     DECLARE @FilasInsertadas INT = @@ROWCOUNT;
     PRINT 'Proceso de importación completado. Filas insertadas en dbo.pago: ' + CAST(@FilasInsertadas AS VARCHAR(10));
+	
+	DROP TABLE IF EXISTS #pago_staging;
+
 END
 
 create function corregirValor(@valor varchar(20))
