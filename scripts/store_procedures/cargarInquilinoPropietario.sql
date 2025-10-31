@@ -1,8 +1,3 @@
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
 CREATE PROCEDURE [dbo].[cargarInquilinoPropietario]
     @RutaArchivoCSV NVARCHAR(255)
 AS
@@ -10,7 +5,7 @@ BEGIN
     SET NOCOUNT ON;
    
     DECLARE @BulkInsertSQL NVARCHAR(MAX);
-    DECLARE @ExisteArchivo INT;
+	DECLARE @ExisteArchivo INT;
 
     EXEC master.dbo.xp_fileexist @RutaArchivoCSV, @ExisteArchivo OUTPUT;
 
@@ -25,13 +20,13 @@ BEGIN
     DROP TABLE IF EXISTS #persona_staging;
 
     CREATE TABLE #persona_staging (
-        nombre_csv NVARCHAR(255),
-        apellido_csv NVARCHAR(255),
-        dni_csv int,
-        email_csv VARCHAR(255),
+        nombre_csv VARCHAR(60),
+        apellido_csv VARCHAR(60),
+        dni_csv varchar(20),
+        email_csv VARCHAR(100),
         telefono_csv VARCHAR(50),
         cvu_cbu_csv VARCHAR(50),    
-        tipo_inquilino_csv VARCHAR(10)
+        tipo_inquilino_csv varchar(5)
     );
 
     SET @BulkInsertSQL = 
@@ -40,50 +35,62 @@ BEGIN
         N'WITH ( ' +
         N'    FIELDTERMINATOR = '';'', ' +
         N'    ROWTERMINATOR = ''\n'', ' +
-        N'    FIRSTROW = 1, ' +
+        N'    FIRSTROW = 2, ' +
         N'    CODEPAGE = ''ACP'' ' +
         N');';
 
     BEGIN TRY
         EXECUTE sp_executesql @BulkInsertSQL;
 
+		UPDATE #persona_staging SET
+            nombre_csv = TRIM(nombre_csv),
+            apellido_csv = TRIM(apellido_csv),
+            dni_csv = TRIM(dni_csv),
+            email_csv = TRIM(email_csv),
+            telefono_csv = TRIM(telefono_csv),
+            cvu_cbu_csv = TRIM(cvu_cbu_csv),
+            tipo_inquilino_csv = TRIM(tipo_inquilino_csv);
+
     END TRY
     BEGIN CATCH
         DECLARE @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE();
         PRINT 'ERROR en BULK INSERT: ' + @ErrorMessage;
         RETURN;
-    END CATCH
+    END CATCH;
 
-    INSERT INTO dbo.persona (
-        dni,
-        nombre,
-        apellido,
-        email,
-        telefono,
-        cuenta,
-        tipo
-    )
-    SELECT
-        dni_csv,
-        dbo.corregirTexto(nombre_csv),
-        dbo.corregirTexto(apellido_csv),
-        dbo.corregirTexto(email_csv),
-        TRIM(telefono_csv),
-        TRIM(cvu_cbu_csv) AS cuenta, 
-        CASE
-            WHEN TRIM(tipo_inquilino_csv) = '1' THEN 1
-            ELSE 0
-        END AS tipo
-    FROM
-        #persona_staging
-    WHERE dni_csv IS NOT NULL;
+	--SELECT TOP 10 * FROM #persona_staging;
+	WITH personas_sin_duplicados AS (
+		SELECT
+			dbo.corregirTexto(nombre_csv) AS nombre,
+			dbo.corregirTexto(apellido_csv) AS apellido,
+			TRY_CAST(dni_csv AS INT) AS dni,
+			dbo.corregirTexto(email_csv) AS email,
+			telefono_csv AS telefono,
+			cvu_cbu_csv AS cuenta,
+			CASE
+				WHEN tipo_inquilino_csv = '1' THEN 1 
+				ELSE 0 
+			END AS tipo,
+			ROW_NUMBER() OVER (PARTITION BY TRY_CAST(dni_csv AS INT) ORDER BY (SELECT NULL)) AS rn
+		FROM #persona_staging
+		WHERE TRY_CAST(dni_csv AS INT) IS NOT NULL
+	)
+
+		INSERT INTO dbo.persona (nombre, apellido, dni, email, telefono, cuenta, tipo)
+		SELECT p.nombre, p.apellido, p.dni, p.email, p.telefono, p.cuenta, p.tipo
+		FROM personas_sin_duplicados p
+		WHERE rn = 1  -- solo una fila por cada dni
+		AND p.dni IS NOT NULL
+		AND NOT EXISTS (
+			SELECT 1 FROM dbo.persona pe WHERE pe.dni = p.dni
+	);
 
     DECLARE @FilasInsertadas INT = @@ROWCOUNT;
     PRINT 'Proceso de importación completado. Filas insertadas en dbo.persona: ' + CAST(@FilasInsertadas AS VARCHAR(10));
-	
-	DROP TABLE IF EXISTS #persona_staging;
 
+	DROP TABLE IF EXISTS #persona_staging;
 END
+
 create function corregirTexto (@texto varchar(50))
 returns varchar(50)
 as
