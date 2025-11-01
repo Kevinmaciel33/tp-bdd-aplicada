@@ -71,7 +71,62 @@ END
 go
 --Genera un reporte de recaudacion mensual por departamento en tabla cruzada(pivot)
 --Filas: DEPTO NRO UF
---Columnas: 12 MESES DEL AÑO
+--Columnas: 12 MESES DEL AÃ‘O
 --Valores/contenido: Total recaudado(suma del importe)
---FILTROS: solo un consorcio especifico, solo pagos de ese año y solo 1 tipo de gasto (Ordinario o extraordinario)
+--FILTROS: solo un consorcio especifico, solo pagos de ese aÃ±o y solo 1 tipo de gasto (Ordinario o extraordinario)
+
 --Tablas 4: pago-uf-detalleexpensa-expensa (inner join en estos)
+	
+--3) TERCER REPORTE - RECAUDACION TOTAL DESAGREGADA
+--SEGUN PROCEDENCIA (ORDINARIO, EXTRAORDINARIO, ETC.) SEGUN PERIODO
+
+CREATE OR ALTER PROCEDURE sp_reporte_recaudacion_desA
+	@FechaInicio DATE,
+	@FechaFin DATE,
+	@IdConsorcio INT
+AS
+BEGIN
+	SELECT
+		de.TipoGasto,
+		SUM(p.Importe) AS Total
+	FROM dbo.Pago p 
+	INNER JOIN dbo.DetalleExpensa de ON p.IdDetalleExp = de.IdDetalle
+	INNER JOIN dbo.Expensa e ON e.IdExpensa = de.IdExpensa
+	WHERE e.IdConsorcio = @IdConsorcio
+	 AND p.FechaPago BETWEEN @FechaInicio AND @FechaFin
+	GROUP BY de.TipoGasto
+	FOR XML AUTO, ROOT('Recaudacion')
+END
+go
+
+--Genera un reporte de recaudacion total desagregada por tipo de gasto (ext/or)
+--en un periodo y lo devuelve en formato XML
+--Agrupa los pagos por tipo de gasto y suma el importe total de cada uno
+--Filtra por consorcio y rango de fechas (periodo)
+
+--4) CUARTO REPORTE - TOP 5 MESES DE MAYORES GASTOS Y TOP 5 MESES DE MAYORES INGRESOS
+
+CREATE OR ALTER PROCEDURE sp_top5_gastos_ingresos
+	@IdConsorcio INT
+AS
+BEGIN
+	SELECT TOP 5 'Gasto' AS Tipo, gor.Mes AS Mes, SUM(gor.Importe) AS Total
+	FROM dbo.GastoOrdinario gor
+	WHERE gor.IdConsorcio = @IdConsorcio 
+	GROUP BY gor.Mes
+	ORDER BY Total DESC;
+
+	SELECT TOP 5 'Ingreso' AS Tipo, MONTH(p.FechaPago) AS Mes, SUM(p.Importe) AS Total
+	FROM dbo.Pago p
+	INNER JOIN dbo.DetalleExpensa de ON p.IdDetalleExp = de.IdDetalle
+	INNER JOIN dbo.Expensa e ON e.IdExpensa = de.IdExpensa
+	WHERE e.IdConsorcio = @IdConsorcio
+	GROUP BY MONTH(p.FechaPago)
+	ORDER BY Total DESC;
+END
+go
+--Dos TOP 5: Gastos y Mayores Ingresos de un consorcio
+--Gastos: toma los gastos ordinarios de la tabla, suma el importe total de cada
+--mes y devuelve los 5 con mayores gasto Tipo-Mes-Total (top 5)
+--Mayores ingresos: toma los pagos de la tabla pago, los agrupa por mes 
+--(el cual saca de fecha de pago), suma el importe recaudado cada mes y hace top 5
