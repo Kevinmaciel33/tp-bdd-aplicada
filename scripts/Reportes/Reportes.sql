@@ -130,3 +130,41 @@ go
 --mes y devuelve los 5 con mayores gasto Tipo-Mes-Total (top 5)
 --Mayores ingresos: toma los pagos de la tabla pago, los agrupa por mes 
 --(el cual saca de fecha de pago), suma el importe recaudado cada mes y hace top 5
+
+
+
+--5) QUINTO REPORTE -->Generacion archivo XML
+
+--Obtenga los 3 (tres) propietarios con mayor morosidad. 
+--Presente información de contacto y DNI de los propietarios para que la administración los pueda contactar o remitir el trámite al estudio jurídico
+
+WITH DeudaPorPropietario AS (
+    SELECT 
+        p.IdPersona,
+        p.Dni,
+        p.Nombre,
+        p.Apellido,
+        p.Email,
+        p.Telefono,
+        SUM(ISNULL(de.Total, 0)) AS TotalExpensas,
+        SUM(ISNULL(pg.Importe, 0)) AS TotalPagos,
+        SUM(ISNULL(de.Total, 0)) - SUM(ISNULL(pg.Importe, 0)) AS Deuda
+    FROM Persona p
+    JOIN UnidadFuncional uf ON p.Cuenta = uf.Cuenta
+    LEFT JOIN DetalleExpensa de ON uf.IdUf = de.IdExpensa
+    LEFT JOIN Pago pg ON uf.IdUf = pg.IdUf
+    WHERE p.Tipo = 0  -- solo propietarios
+    GROUP BY p.IdPersona, p.Dni, p.Nombre, p.Apellido, p.Email, p.Telefono
+)
+SELECT TOP 3
+    p.Dni AS 'Propietario/@Dni',
+    p.Nombre AS 'Propietario/Nombre',
+    p.Apellido AS 'Propietario/Apellido',
+    p.Email AS 'Propietario/Email',
+    p.Telefono AS 'Propietario/Telefono',
+    p.TotalExpensas AS 'Propietario/TotalExpensas',
+    p.TotalPagos AS 'Propietario/TotalPagos',
+    p.Deuda AS 'Propietario/Deuda'
+FROM DeudaPorPropietario p
+ORDER BY p.Deuda DESC
+FOR XML PATH('Morosos'), ROOT('ReportePropietariosMorosos');
