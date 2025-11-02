@@ -106,7 +106,7 @@ go
 
 --4) CUARTO REPORTE - TOP 5 MESES DE MAYORES GASTOS Y TOP 5 MESES DE MAYORES INGRESOS
 
-CREATE OR ALTER PROCEDURE sp_top5_gastos_ingresos
+CREATE OR ALTER PROCEDURE sp_reporte_top5_gastos_ingresos
 	@IdConsorcio INT
 AS
 BEGIN
@@ -132,39 +132,85 @@ go
 --(el cual saca de fecha de pago), suma el importe recaudado cada mes y hace top 5
 
 
-
---5) QUINTO REPORTE -->Generacion archivo XML
-
---Obtenga los 3 (tres) propietarios con mayor morosidad. 
---Presente información de contacto y DNI de los propietarios para que la administración los pueda contactar o remitir el trámite al estudio jurídico
-
-WITH DeudaPorPropietario AS (
-    SELECT 
-        p.IdPersona,
+--5) QUINTO REPORTE - 3 PROPIETARIOS CON MAYOR MOROSIDAD
+--INFO DE CONTACTO Y DNI DE LOS PROPIETARIOS PARA CONTACTO DE LA ADMINISTRACION
+CREATE OR ALTER PROCEDURE sp_reporte_top3_morosidad
+AS
+BEGIN
+	;WITH DeudaPorPropietario AS (
+	SELECT 
+		per.id_persona,
+		per.Nombre,
+		per.Apellido,
+		per.DNI,
+		per.Email,
+		per.Telefono,
+		SUM(ISNULL(de.Total, 0)) AS TotalExpensas,
+        SUM(ISNULL(pg.Importe, 0)) AS TotalPagos,
+        SUM(ISNULL(de.Total, 0)) - SUM(ISNULL(pg.Importe, 0)) AS Deuda
+	FROM dbo.persona per
+	INNER JOIN dbo.UnidadFuncional UF on per.cuenta = uf.Cuenta
+	LEFT JOIN dbo.DetalleExpensa de ON uf.IdUf = de.IdExpensa  -- revisar relación según tu DER
+    LEFT JOIN dbo.Pago pg ON uf.IdUf = pg.IdUf
+    WHERE per.Tipo = 0  -- solo propietarios
+    GROUP BY per.id_persona, per.Dni, per.Nombre, per.Apellido, per.Email, per.Telefono
+    )
+	SELECT TOP 3
         p.Dni,
         p.Nombre,
         p.Apellido,
         p.Email,
         p.Telefono,
-        SUM(ISNULL(de.Total, 0)) AS TotalExpensas,
-        SUM(ISNULL(pg.Importe, 0)) AS TotalPagos,
-        SUM(ISNULL(de.Total, 0)) - SUM(ISNULL(pg.Importe, 0)) AS Deuda
-    FROM Persona p
-    JOIN UnidadFuncional uf ON p.Cuenta = uf.Cuenta
-    LEFT JOIN DetalleExpensa de ON uf.IdUf = de.IdExpensa
-    LEFT JOIN Pago pg ON uf.IdUf = pg.IdUf
-    WHERE p.Tipo = 0  -- solo propietarios
-    GROUP BY p.IdPersona, p.Dni, p.Nombre, p.Apellido, p.Email, p.Telefono
-)
-SELECT TOP 3
-    p.Dni AS 'Propietario/@Dni',
-    p.Nombre AS 'Propietario/Nombre',
-    p.Apellido AS 'Propietario/Apellido',
-    p.Email AS 'Propietario/Email',
-    p.Telefono AS 'Propietario/Telefono',
-    p.TotalExpensas AS 'Propietario/TotalExpensas',
-    p.TotalPagos AS 'Propietario/TotalPagos',
-    p.Deuda AS 'Propietario/Deuda'
-FROM DeudaPorPropietario p
-ORDER BY p.Deuda DESC
-FOR XML PATH('Morosos'), ROOT('ReportePropietariosMorosos');
+        p.TotalExpensas,
+        p.TotalPagos,
+        p.Deuda
+    FROM DeudaPorPropietario p
+    ORDER BY p.Deuda DESC;
+END
+go
+--LOS 3 PROPIETARIOS CON MÁS DEUDA
+--Debe incluir personas sin pagos (aquellos que mas deben)
+--Si no hay pagos cuenta como 0 en vez de null
+--Dni, nombre, apellido, email, telefono (datos del propietario)
+--ordenado por deuda descendiente 
+--Total expensa (lo que deberia haber pagado)
+--TotalPagos (lo que realmente pago)
+--Deuda(diferencia) (lo que debe)
+--USA CTE(WITH DEUDA POR PROPIETARIO)
+
+--6) SEXTO REPORTE - FECHAS DE PAGO DE EXPENSAS ORDINARIAS DE CADA UF
+-- + CANTIDAD DE DIAS QUE PASAN ENTRE UN PAGO Y EL SIGUIENTE 
+CREATE OR ALTER PROCEDURE sp_reporte_dias_entre_pagos
+    @IdConsorcio INT,
+    @IdUf INT,
+    @FechaDesde DATE
+AS
+BEGIN
+    WITH PagosOrdenados AS (
+        SELECT 
+            p.IdUf,
+            p.FechaPago,
+            LAG(p.FechaPago) OVER (PARTITION BY p.IdUf ORDER BY p.FechaPago) AS PagoAnterior
+        FROM dbo.Pago p
+        INNER JOIN dbo.DetalleExpensa de ON p.IdDetalleExp = de.IdDetalle
+        INNER JOIN dbo.Expensa e ON e.IdExpensa = de.IdExpensa
+        WHERE e.IdConsorcio = @IdConsorcio AND p.IdUf = @IdUf AND p.FechaPago >= @FechaDesde
+    )
+    SELECT 
+        IdUf,
+        FechaPago,
+        DATEDIFF(DAY, PagoAnterior, FechaPago) AS DiasEntrePagos
+    FROM PagosOrdenados
+    FOR XML AUTO, ROOT('Pagos');
+END
+--Cuantos dias trancurrieron entre cada pago consecutivo de una misma UF
+--DEVUELVE EN XML
+--USA CTE (WITH PAGOSORDENADOS)
+--Crea una tabla temporal con fechadepagoactual y fechapagoanterior
+--Calcula la diferencia en dias entre pago y pago
+--Filtro: idconsorcio(solo pagos del consorcio especificado), iduf (solo pagos de la uf)
+--fecha desde: solo pagos desde esa fecha
+--Sirve para analizar la regularidad de pagos de una uf, detectar irregularidades (muchos dias entre pagos
+--ver si un inquilino paga mensualmente, anualmente, etc.
+--LAG WINDOWS FUNCTION que trae el valor de la fila anterior
+--Lag "mirar hacia atras", devuelve el pagoanterior a la fechapagoactual
