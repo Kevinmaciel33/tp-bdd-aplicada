@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[sp_importarPagos]
+CREATE OR ALTER PROCEDURE [tpo].[sp_importarPagos]
     @RutaArchivoCSV NVARCHAR(255)
 AS
 BEGIN
@@ -46,29 +46,29 @@ BEGIN
         RETURN;
     END CATCH
 
-    INSERT INTO dbo.pago (
-        id_pago,
-        fecha,
-        cuenta,
-        importe
+    INSERT INTO tpo.Pago (
+        IdPago,
+        FechaPago,
+        Cuenta,
+        Importe
     )
     SELECT
         id_pago_csv,
         CONVERT(DATE, fecha_csv, 103),
         cvu_cbu_csv,
-        dbo.corregirValor(valor_csv)
+        tpo.corregirValor(valor_csv)
     FROM
         #pago_staging
     WHERE id_pago_csv IS NOT NULL;
 
     DECLARE @FilasInsertadas INT = @@ROWCOUNT;
-    PRINT 'Proceso de importación completado. Filas insertadas en dbo.pago: ' + CAST(@FilasInsertadas AS VARCHAR(10));
+    PRINT 'Proceso completado. Filas insertadas en Pago: ' + CAST(@FilasInsertadas AS VARCHAR(10));
 	
 	DROP TABLE IF EXISTS #pago_staging;
 
 END
-
-create function corregirValor(@valor varchar(20))
+go
+create or alter function tpo.corregirValor(@valor varchar(20))
 returns decimal(10,2)
 as
 begin
@@ -93,3 +93,4 @@ begin
 
 	RETURN @resultado;
 end
+go
