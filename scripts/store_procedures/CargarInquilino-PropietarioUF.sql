@@ -1,90 +1,75 @@
-
-
-
-
-
-CREATE PROCEDURE [dbo].[cargarInquilinoPropietarioUF]
-    @RutaArchivoCSV NVARCHAR(255)
+CREATE OR ALTER PROCEDURE [tpo].[sp_agregarCuentasUF]
+    @RutaArchivoTXT NVARCHAR(255)
 AS
 BEGIN
     SET NOCOUNT ON;
-
-    DECLARE @BulkInsertSQL NVARCHAR(MAX);
+    
     DECLARE @ExisteArchivo INT;
-
-    -- Verifica que el archivo exista
-    EXEC master.dbo.xp_fileexist @RutaArchivoCSV, @ExisteArchivo OUTPUT;
-
+    EXEC master.dbo.xp_fileexist @RutaArchivoTXT, @ExisteArchivo OUTPUT;
     IF @ExisteArchivo = 0
     BEGIN
-        PRINT 'ERROR: El archivo no existe en la ruta especificada: ' + @RutaArchivoCSV;
-        RETURN;
+        PRINT 'ERROR: El archivo no existe en la ruta: ' + @RutaArchivoTXT;
+        RETURN -1;
     END
 
-    PRINT 'Archivo encontrado: ' + @RutaArchivoCSV;
-
-    DROP TABLE IF EXISTS #UF_staging;
-
-    -- Crea tabla temporal para staging
-    CREATE TABLE #UF_staging (
-        cvu_cbu_csv VARCHAR(50),
-        nombreConsorcio_csv NVARCHAR(100),
-        nroUF_csv INT,
-        piso_csv VARCHAR(5),
-        depto_csv VARCHAR(5)
+    DROP TABLE IF EXISTS #staging_cuentas_uf;
+    CREATE TABLE #staging_cuentas_uf (
+        CVU_CBU_Raw VARCHAR(50),
+        NombreConsorcio_Raw VARCHAR(100),
+        NroUf_Raw VARCHAR(10),
+        Piso_Raw VARCHAR(10),
+        Depto_Raw VARCHAR(10)
     );
 
-    -- Carga el CSV a la tabla temporal
+    DECLARE @BulkInsertSQL NVARCHAR(MAX);
     SET @BulkInsertSQL = 
-        N'BULK INSERT #UF_staging ' +
-        N'FROM ''' + @RutaArchivoCSV + N''' ' +
+        N'BULK INSERT #staging_cuentas_uf ' +
+        N'FROM ''' + @RutaArchivoTXT + N''' ' +
         N'WITH ( ' +
-        N'    FIELDTERMINATOR = ''|'', ' +   -- separador de columnas
-        N'    ROWTERMINATOR = ''\n'', ' +
-        N'    FIRSTROW = 2, ' +              -- salta el encabezado
+        N'    FIELDTERMINATOR = ''|'', ' +  
+        N'    ROWTERMINATOR = ''\n'', ' + 
+        N'    FIRSTROW = 2, ' +           
         N'    CODEPAGE = ''ACP'' ' +
         N');';
 
     BEGIN TRY
-        EXEC sp_executesql @BulkInsertSQL;
+        EXECUTE sp_executesql @BulkInsertSQL;
+        PRINT 'BULK INSERT a Staging completado. ' + CAST(@@ROWCOUNT AS VARCHAR) + ' filas cargadas.';
     END TRY
     BEGIN CATCH
-        PRINT 'ERROR al cargar el archivo: ' + ERROR_MESSAGE();
-        RETURN;
+        DECLARE @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE();
+        PRINT 'ERROR en BULK INSERT: ' + @ErrorMessage;
+        PRINT 'Revisa los permisos, el delimitador (|) y el ROWTERMINATOR (fin de lï¿½nea).';
+        DROP TABLE IF EXISTS #staging_cuentas_uf;
+        RETURN -1;
     END CATCH;
 
-    DECLARE @IdConsorcio INT;
+    
+    BEGIN TRY
+        UPDATE uf
+        SET
+            uf.Cuenta = TRIM(s.CVU_CBU_Raw)
+        FROM
+            tpo.UnidadFuncional AS uf
+        INNER JOIN tpo.Consorcio AS c ON uf.IdConsorcio = c.IdConsorcio
+        INNER JOIN #staging_cuentas_uf AS s ON
+            c.Nombre = TRIM(s.NombreConsorcio_Raw)
+            AND uf.NroUf = TRY_CAST(TRIM(s.NroUf_Raw) AS INT)
+            AND uf.Piso = TRIM(s.Piso_Raw)
+            AND uf.Depto = TRIM(s.Depto_Raw);
 
-    -- Tomamos el consorcio del CSV
-    SELECT TOP 1 @IdConsorcio = c.IdConsorcio
-    FROM Consorcio c
-    JOIN #UF_staging s ON c.Nombre = s.nombreConsorcio_csv;
+        PRINT 'UPDATE completado. ' + CAST(@@ROWCOUNT AS VARCHAR) + ' filas actualizadas en tpo.UnidadFuncional.';
 
-    IF @IdConsorcio IS NULL
-    BEGIN
-        PRINT 'ERROR: El consorcio no existe en la base de datos.';
-        RETURN;
-    END
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessageUpdate NVARCHAR(MAX) = ERROR_MESSAGE();
+        PRINT 'ERROR durante el UPDATE: ' + @ErrorMessageUpdate;
+        DROP TABLE IF EXISTS #staging_cuentas_uf;
+        RETURN -1;
+    END CATCH;
 
-    -- Inserta las unidades funcionales
-    INSERT INTO UnidadFuncional (IdConsorcio, NroUf, Cuenta, Piso, Depto, Coeficiente, M2)
-    SELECT
-        @IdConsorcio,
-        nroUF_csv,
-        cvu_cbu_csv,
-        piso_csv,
-        depto_csv,
-        0.0,   -- coeficiente se calculará aparte
-        0.0    -- m2 se puede cargar en otro proceso
-    FROM #UF_staging;
-
-    DECLARE @FilasInsertadas INT = @@ROWCOUNT;
-    PRINT 'Importación completada. Filas insertadas en UnidadFuncional: ' + CAST(@FilasInsertadas AS VARCHAR(10));
-
-    DROP TABLE IF EXISTS #UF_staging;
+    DROP TABLE IF EXISTS #staging_cuentas_uf;
+    PRINT 'Proceso completado .';
+    SET NOCOUNT OFF;
 END
 GO
-
-
-
-
