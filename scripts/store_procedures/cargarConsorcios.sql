@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[sp_importarConsorcios]
+CREATE OR ALTER PROCEDURE [tpo].[sp_importarConsorcios]
     @RutaArchivoCSV NVARCHAR(255)
 AS
 BEGIN
@@ -47,12 +47,12 @@ BEGIN
         RETURN;
     END CATCH
 
-    INSERT INTO dbo.consorcios (
-        id_consorcio,
-        nombre,
-        direccion,
-        unidades,
-		m2
+    INSERT INTO tpo.Consorcio (
+        IdConsorcio,
+        Nombre,
+        Direccion,
+        Unidades,
+		M2total
     )
     SELECT
         RIGHT(id_consorcio_csv, len(id_consorcio_csv)-charindex(' ',id_consorcio_csv)),
@@ -65,7 +65,7 @@ BEGIN
     WHERE id_consorcio_csv IS NOT NULL;
 
     DECLARE @FilasInsertadas INT = @@ROWCOUNT;
-    PRINT 'Proceso de importación completado. Filas insertadas en dbo.consorcios: ' + CAST(@FilasInsertadas AS VARCHAR(10));
+    PRINT 'Proceso completado. Filas insertadas en Consorcio: ' + CAST(@FilasInsertadas AS VARCHAR(10));
 
 	DROP TABLE IF EXISTS #consorcios_staging
 END
