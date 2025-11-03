@@ -1,0 +1,123 @@
+---TP BDA
+---Creacion de bd, esquemas, tablas y sp
+
+IF NOT EXISTS ( SELECT name FROM sys.databases WHERE name = 'BDDATP')
+BEGIN
+    PRINT 'Creando la base de datos BDDATP...';
+    CREATE DATABASE BDDATP
+    COLLATE Modern_Spanish_CI_AS; -- Latin1_General_CI_AI;
+END
+ELSE
+BEGIN
+    PRINT 'La base de datos BDDATP ya existe.';
+END
+GO
+
+use BDDATP
+go
+
+--verifica si existe el esquema
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'tpo')
+BEGIN
+	EXEC('CREATE SCHEMA tpo')
+END
+GO
+
+
+--:WHENEVER SQLERROR EXIT -1 
+--ACTIVAR 'SQLCMD Mode' desde la opcion "Query" en la barra
+PRINT 'Ejecutando script de TABLAS...';
+:r "C:\tp-bdd-aplicada\scripts\tablas\creacionTablas.sql"
+PRINT '...Tablas creadas.';
+GO 
+
+
+
+--CREAMOS LOS SP
+PRINT 'Creando Stored Procedures...';
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilinoPropietario.sql"
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarConsorcios.sql"
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarUnidadesFuncionales.sql"
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarProveedores.sql"
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarPagos.sql"
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarGastosOrd.sql"
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilino-PropietarioUF.sql"
+go
+PRINT '...Stored Procedures creados.';
+GO
+
+
+PRINT 'Iniciando carga de DATOS...';
+go
+BEGIN TRANSACTION CargaDatos;
+
+BEGIN TRY
+    -- Paso 1
+    PRINT 'Cargando Inquilinos/Propietarios...';
+    EXEC tpo.sp_cargarInquilinoPropietario 'C:\tp-bdd-aplicada\archivos_a_importar\Inquilino-propietarios-datos.csv';
+    PRINT '... Inquilinos/Propietarios cargados.';
+
+    -- Paso 2
+    PRINT 'Importando Consorcios...';
+    EXEC tpo.sp_importarConsorcios 'C:\tp-bdd-aplicada\archivos_a_importar\Datos varios - Consorcios.csv';
+    PRINT '... Consorcios importados.';
+
+    -- Paso 3
+    PRINT 'Cargando Unidades Funcionales...';
+    EXEC tpo.sp_cargarUnidadesFuncionales 'C:\tp-bdd-aplicada\archivos_a_importar\UF por consorcio.txt';
+    PRINT '... Unidades Funcionales cargadas.';
+
+    -- Paso 4
+    PRINT 'Cargando Proveedores...';
+    EXEC tpo.sp_cargarProveedores 'C:\tp-bdd-aplicada\archivos_a_importar\Datos varios - Proveedores.csv';
+    PRINT '... Proveedores cargados.';
+
+    -- Paso 5
+    PRINT 'Importando Pagos...';
+    EXEC tpo.sp_importarPagos 'C:\tp-bdd-aplicada\archivos_a_importar\pagos_consorcios.csv';
+    PRINT '... Pagos importados.';
+
+    -- Paso 6
+    PRINT 'Cargando Gastos Ordinarios...';
+    EXEC tpo.sp_cargarGastosOrdinarios 'C:\tp-bdd-aplicada\archivos_a_importar\Servicios.Servicios.json';
+    PRINT '... Gastos Ordinarios cargados.';
+
+    -- Paso 7
+    PRINT 'Agregando Cuentas UF...';
+    EXEC tpo.sp_agregarCuentasUF 'C:\tp-bdd-aplicada\archivos_a_importar\Inquilino-propietarios-UF.csv';
+    PRINT '... Cuentas UF agregadas.';
+
+    COMMIT TRANSACTION CargaDatos;
+    
+    PRINT '==================================================';
+    PRINT 'Todos los datos fueron cargados correctamente.';
+    PRINT '==================================================';
+
+END TRY
+BEGIN CATCH
+
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION CargaDatos;
+
+    PRINT '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!';
+    PRINT '¡ERROR! El script ha fallado.';
+    PRINT '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!';
+    PRINT 'El último paso que se intentó ejecutar fue: (Ver mensaje anterior a este bloque)';
+    PRINT ' ';
+    PRINT 'Mensaje de Error: ' + ERROR_MESSAGE();
+    PRINT 'Número de Error:  ' + CAST(ERROR_NUMBER() AS VARCHAR);
+    PRINT 'Línea del Error:  ' + CAST(ERROR_LINE() AS VARCHAR);
+    PRINT 'Procedimiento:    ' + ISNULL(ERROR_PROCEDURE(), 'No estaba dentro de un SP (falló el script principal)');
+    PRINT ' ';
+    PRINT 'Todos los cambios han sido revertidos (ROLLBACK).';
+    PRINT 'La base de datos está limpia.';
+
+END CATCH
+GO
