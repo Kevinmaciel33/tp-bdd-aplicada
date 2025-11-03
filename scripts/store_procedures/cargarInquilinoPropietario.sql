@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[cargarInquilinoPropietario]
+CREATE OR ALTER PROCEDURE [tpo].[sp_cargarInquilinoPropietario]
     @RutaArchivoCSV NVARCHAR(255)
 AS
 BEGIN
@@ -61,10 +61,10 @@ BEGIN
 	--SELECT TOP 10 * FROM #persona_staging;
 	WITH personas_sin_duplicados AS (
 		SELECT
-			dbo.corregirTexto(nombre_csv) AS nombre,
-			dbo.corregirTexto(apellido_csv) AS apellido,
+			tpo.corregirTexto(nombre_csv) AS nombre,
+			tpo.corregirTexto(apellido_csv) AS apellido,
 			TRY_CAST(dni_csv AS INT) AS dni,
-			dbo.corregirTexto(email_csv) AS email,
+			tpo.corregirTexto(email_csv) AS email,
 			telefono_csv AS telefono,
 			cvu_cbu_csv AS cuenta,
 			CASE
@@ -76,22 +76,36 @@ BEGIN
 		WHERE TRY_CAST(dni_csv AS INT) IS NOT NULL
 	)
 
-		INSERT INTO dbo.persona (nombre, apellido, dni, email, telefono, cuenta, tipo)
-		SELECT p.nombre, p.apellido, p.dni, p.email, p.telefono, p.cuenta, p.tipo
+		INSERT INTO tpo.Persona (
+            Nombre, 
+            Apellido,
+            DNI,
+            Email,
+            Telefono,
+            Cuenta,
+            Tipo
+        )
+		SELECT p.nombre, 
+            p.apellido, 
+            p.dni, 
+            p.email, 
+            p.telefono, 
+            p.cuenta, 
+            p.tipo
 		FROM personas_sin_duplicados p
 		WHERE rn = 1  -- solo una fila por cada dni
 		AND p.dni IS NOT NULL
 		AND NOT EXISTS (
-			SELECT 1 FROM dbo.persona pe WHERE pe.dni = p.dni
+			SELECT 1 FROM tpo.Persona pe WHERE pe.DNI = p.dni
 	);
 
     DECLARE @FilasInsertadas INT = @@ROWCOUNT;
-    PRINT 'Proceso de importación completado. Filas insertadas en dbo.persona: ' + CAST(@FilasInsertadas AS VARCHAR(10));
+    PRINT 'Proceso completado. Filas insertadas en Persona: ' + CAST(@FilasInsertadas AS VARCHAR(10));
 
 	DROP TABLE IF EXISTS #persona_staging;
 END
-
-create function corregirTexto (@texto varchar(50))
+go
+create or alter function tpo.corregirTexto (@texto varchar(50))
 returns varchar(50)
 as
 begin
@@ -123,3 +137,4 @@ begin
 
 	return @resultado
 end
+go
