@@ -1,5 +1,4 @@
 --API DOLAR
---Habilitamos acceso a datos externos
 
 CREATE TABLE cotizacion_dolar (
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -17,7 +16,7 @@ BEGIN
 
     -- Leer el archivo JSON local
     SELECT @Json = BulkColumn
-    FROM OPENROWSET(BULK 'C:\tp-bdd-aplicada/scripts/Reportes', SINGLE_CLOB) AS j;
+    FROM OPENROWSET(BULK 'C:/tp-bdd-aplicada/scripts/Reportes/dolar.json', SINGLE_CLOB) AS j;
 
     -- Insertar los valores desde el JSON
     INSERT INTO cotizacion_dolar (tipo, compra, venta, promedio)
