@@ -17,7 +17,7 @@ BEGIN
 
     -- Leer el archivo JSON local
     SELECT @Json = BulkColumn
-    FROM OPENROWSET(BULK 'C:\Importar\dolar.json', SINGLE_CLOB) AS j;
+    FROM OPENROWSET(BULK 'C:\tp-bdd-aplicada/scripts/Reportes', SINGLE_CLOB) AS j;
 
     -- Insertar los valores desde el JSON
     INSERT INTO cotizacion_dolar (tipo, compra, venta, promedio)
