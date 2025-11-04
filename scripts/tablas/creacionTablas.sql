@@ -22,13 +22,20 @@ BEGIN
 	IdExpensa INT NOT NULL IDENTITY(1,1),
 	IdConsorcio INT NOT NULL,
 	Mes INT NOT NULL,
-	Anio INT NOT NULL,
-	Total DECIMAL(12,2) NOT NULL,
+	FechaGeneracion DATE NOT NULL,
+	vto1 DATE NOT NULL,
+	vto2 DATE NOT NULL,
+	SaldoAnterior DECIMAL(12,2) NOT NULL,
+	IngresosPagoTermino DECIMAL(12,2) NOT NULL,
+	IngresosPagoAdeudado DECIMAL(12,2) NOT NULL,
+	IngresosPagoAdelantado DECIMAL(12,2) NOT NULL,
+	Egresos DECIMAL(12,2) NOT NULL,
+	SaldoCierre DECIMAL(12,2) NOT NULL,
 
 	CONSTRAINT Pk_Expensa  PRIMARY KEY(IdExpensa), 
 	CONSTRAINT Ck_Mes CHECK (Mes between 1 and 12 ),
-	CONSTRAINT Ck_Anio CHECK (Anio BETWEEN 2000 AND 2026), 
-	CONSTRAINT Ck_Total CHECK(Total>=0),
+	--CONSTRAINT Ck_Anio CHECK (Anio BETWEEN 2000 AND 2026), 
+	--CONSTRAINT Ck_Total CHECK(Total>=0),
 	CONSTRAINT Fk_Consorcio_Expensa FOREIGN KEY(IdConsorcio) REFERENCES tpo.Consorcio (IdConsorcio)
 	);
 END
@@ -155,19 +162,21 @@ BEGIN
 	CREATE TABLE tpo.DetalleExpensa (
 	IdDetalle INT IDENTITY(1,1),
 	IdExpensa INT NOT NULL,
-	TipoGasto CHAR(1) NOT NULL,  -- O=Ordinario, E=Extraordinario 
+	IdUf INT,
+	--TipoGasto CHAR(1) NOT NULL,  -- O=Ordinario, E=Extraordinario 
 	Porcentaje DECIMAL(5,2) NOT NULL ,
-	--SaldoAnterior
-	--PagosRecibidos
-	--Deuda
-	--InteresesMora
+	SaldoAnterior DECIMAL(12,2),
+	PagosRecibidos DECIMAL(12,2),
+	Deuda DECIMAL(12,2),
+	InteresesMora DECIMAL(12,2),
 	TotalOrd DECIMAL(12,2) NULL,
 	TotalExt DECIMAL(12,2) NULL,
 	Total DECIMAL(12,2) NOT NULL,
 
 	CONSTRAINT PkIdDetalle PRIMARY KEY (IdDetalle),
 	CONSTRAINT FK_DetalleExpensa_Expensa FOREIGN KEY (IdExpensa) REFERENCES tpo.Expensa(IdExpensa),
-	CONSTRAINT Ck_TipoGasto CHECK(TipoGasto IN('O','E')),
+	CONSTRAINT FK_DetalleExpensa_IdUf FOREIGN KEY (IdUf) REFERENCES tpo.UnidadFuncional(IdUf),
+	--CONSTRAINT Ck_TipoGasto CHECK(TipoGasto IN('O','E')),
 	CONSTRAINT Porcentaje CHECK(Porcentaje>0),
 	CONSTRAINT Total CHECK(Total>0)
 );
