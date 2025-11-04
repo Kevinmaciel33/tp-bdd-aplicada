@@ -11,6 +11,7 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_flujo_caja]
 	@IdConsorcio INT
 AS
 BEGIN
+	BEGIN TRY
 	SELECT
 		DATEPART(WEEK, p.FechaPago) AS Semana, 
 		SUM(ISNULL(de.TotalOrd, 0)) AS TotalOrdinario,
@@ -25,6 +26,12 @@ BEGIN
 	 AND p.FechaPago BETWEEN @FechaInicio AND @FechaFin
 	GROUP BY DATEPART(WEEK, p.FechaPago)
 	ORDER BY Semana;
+	END TRY
+	BEGIN CATCH
+		PRINT 'ERROR en sp_reporte_flujo_caja:'
+		PRINT ERROR_MESSAGE();
+		THROW;
+	END CATCH
 END;
 GO
 
@@ -37,6 +44,7 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_recaudacion_mensual]
 	@IdConsorcio INT
 AS
 BEGIN
+	BEGIN TRY
 	SELECT *
 	FROM (
 		  SELECT
@@ -53,8 +61,14 @@ BEGIN
 	PIVOT ( 
 	       SUM(Importe) FOR Mes IN ([1],[2],[3],[4],[5],[6],[7],[8],[9],[10],[11],[12])
 		   ) AS PivotRecaudacion;
+	END TRY
+	BEGIN CATCH
+		PRINT 'ERROR en sp_reporte_recaudacion_mensual:'
+		PRINT ERROR_MESSAGE();
+		THROW;
+	END CATCH
 END;
-go
+GO
 
 --3) TERCER REPORTE - RECAUDACION TOTAL DESAGREGADA
 --SEGUN PROCEDENCIA (ORDINARIO, EXTRAORDINARIO, ETC.) SEGUN PERIODO
@@ -65,6 +79,7 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_recaudacion_desA]
 	@IdConsorcio INT
 AS
 BEGIN
+	BEGIN TRY
 	SELECT
 		'Ordinario' AS Tipo,
 		SUM(ISNULL(de.TotalOrd, 0)) AS Total
@@ -84,8 +99,14 @@ BEGIN
 	 AND e.FechaGeneracion BETWEEN @FechaInicio AND @FechaFin
 
 	FOR XML AUTO, ROOT('Recaudacion')
+	END TRY
+	BEGIN CATCH
+		PRINT 'ERROR en sp_reporte_recaudacion_desA'
+		PRINT ERROR_MESSAGE();
+		THROW;
+	END CATCH
 END;
-go
+GO
 
 
 --4) CUARTO REPORTE - TOP 5 MESES DE MAYORES GASTOS Y TOP 5 MESES DE MAYORES INGRESOS
@@ -94,6 +115,7 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_top5_gastos_ingresos]
 	@IdConsorcio INT
 AS
 BEGIN
+ BEGIN TRY
 	SELECT TOP 5 'Gasto Ordinario' AS Tipo, gor.Mes AS Mes, SUM(gor.Importe) AS Total
 	FROM tpo.GastoOrdinario gor
 	WHERE gor.IdConsorcio = @IdConsorcio 
@@ -107,8 +129,14 @@ BEGIN
 	WHERE e.IdConsorcio = @IdConsorcio
 	GROUP BY MONTH(p.FechaPago)
 	ORDER BY Total DESC;
+ END TRY
+ BEGIN CATCH
+	PRINT 'ERROR en sp_reporte_top5_gastos_ingresos:'
+	PRINT ERROR_MESSAGE();
+	THROW;
+ END CATCH
 END;
-go
+GO
 
 
 --5) QUINTO REPORTE - 3 PROPIETARIOS CON MAYOR MOROSIDAD
@@ -116,6 +144,7 @@ go
 CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_top3_morosidad]
 AS
 BEGIN
+	BEGIN TRY 
 	;WITH DeudaPorPropietario AS (
 	SELECT 
 		per.DNI,
@@ -136,8 +165,15 @@ BEGIN
 	SELECT TOP 3 *
 	FROM DeudaPorPropietario
 	ORDER BY Deuda DESC;
+	END TRY
+	BEGIN CATCH
+		PRINT 'ERROR en sp_reporte_top3_morosidad:'
+		PRINT ERROR_MESSAGE();
+		THROW;
+	END CATCH
 END;
-go
+GO
+
 
 --6) SEXTO REPORTE - FECHAS DE PAGO DE EXPENSAS ORDINARIAS DE CADA UF
 -- + CANTIDAD DE DIAS QUE PASAN ENTRE UN PAGO Y EL SIGUIENTE 
@@ -147,6 +183,7 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_dias_entre_pagos]
     @FechaDesde DATE
 AS
 BEGIN
+	BEGIN TRY
     WITH PagosOrdenados AS (
         SELECT 
             p.IdUf,
@@ -165,6 +202,11 @@ BEGIN
         DATEDIFF(DAY, PagoAnterior, FechaPago) AS DiasEntrePagos
     FROM PagosOrdenados
     FOR XML AUTO, ROOT('Pagos');
+	END TRY
+	BEGIN CATCH
+		PRINT 'ERROR en sp_reporte_dias_entre_pagos:' 
+		PRINT ERROR_MESSAGE();
+		THROW;
+	END CATCH
 END;
-go
-
+GO
