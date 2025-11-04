@@ -1,3 +1,4 @@
+--API DOLAR
 --Habilitamos acceso a datos externos
 
 EXEC sp_configure 'show advanced options', 1;
@@ -5,12 +6,12 @@ RECONFIGURE;
 EXEC sp_configure 'Ole Automation Procedures', 1;
 RECONFIGURE;
 
-use expensas
+use BDDATP
 go
 
 
 
-CREATE TABLE cotizacion_dolar (
+CREATE TABLE tpo.cotizacion_dolar (
     id INT IDENTITY(1,1) PRIMARY KEY,
     fecha DATETIME DEFAULT GETDATE(),
     tipo VARCHAR(10),        -- 'oficial' o 'blue'
@@ -18,8 +19,9 @@ CREATE TABLE cotizacion_dolar (
     venta DECIMAL(10,2),
     promedio DECIMAL(10,2)
 );
+go
 
-CREATE OR ALTER PROCEDURE sp_actualizar_cotizacion_dolar
+CREATE OR ALTER PROCEDURE tpo.sp_actualizar_cotizacion_dolar
 AS
 BEGIN
     DECLARE @Object INT,
@@ -51,6 +53,3 @@ BEGIN
         JSON_VALUE(@Json, '$.blue.value_avg');
 END;
 GO
-
-EXEC sp_actualizar_cotizacion_dolar;
-SELECT * FROM cotizacion_dolar;
