@@ -1,6 +1,7 @@
+--Habilitamos acceso a datos externos
 --API DOLAR
 
-CREATE TABLE cotizacion_dolar (
+CREATE TABLE tpo.cotizacion_dolar (
     id INT IDENTITY(1,1) PRIMARY KEY,
     fecha DATETIME DEFAULT GETDATE(),
     tipo VARCHAR(10),        -- 'oficial' o 'blue'
@@ -20,7 +21,7 @@ BEGIN
     FROM OPENROWSET(BULK 'C:/tp-bdd-aplicada/archivos_a_importar/dolar.json', SINGLE_CLOB) AS j;
 
     -- Insertar los valores desde el JSON
-    INSERT INTO cotizacion_dolar (tipo, compra, venta, promedio)
+    INSERT INTO tpo.cotizacion_dolar (tipo, compra, venta, promedio)
     SELECT 
         'oficial',
         TRY_CAST(JSON_VALUE(@Json, '$.oficial.value_buy') AS DECIMAL(10,2)),
