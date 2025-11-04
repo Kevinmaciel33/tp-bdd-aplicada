@@ -8,15 +8,16 @@ CREATE TABLE cotizacion_dolar (
     venta DECIMAL(10,2),
     promedio DECIMAL(10,2)
 );
+go
 
-CREATE OR ALTER PROCEDURE sp_actualizar_cotizacion_dolar
+CREATE OR ALTER PROCEDURE tpo.sp_actualizar_cotizacion_dolar
 AS
 BEGIN
     DECLARE @Json NVARCHAR(MAX);
 
     -- Leer el archivo JSON local
     SELECT @Json = BulkColumn
-    FROM OPENROWSET(BULK 'C:/tp-bdd-aplicada/scripts/Reportes/dolar.json', SINGLE_CLOB) AS j;
+    FROM OPENROWSET(BULK 'C:/tp-bdd-aplicada/archivos_a_importar/dolar.json', SINGLE_CLOB) AS j;
 
     -- Insertar los valores desde el JSON
     INSERT INTO cotizacion_dolar (tipo, compra, venta, promedio)
