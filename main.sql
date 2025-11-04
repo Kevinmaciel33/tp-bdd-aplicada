@@ -121,3 +121,43 @@ BEGIN CATCH
 
 END CATCH
 GO
+
+PRINT 'Creando Reportes...';
+GO
+:r "C:\tp-bdd-aplicada\scripts\reportes\reportes.sql"
+GO
+PRINT '...Reportes creados.';
+GO
+
+PRINT 'Creando índices de reportes...';
+GO
+:r "C:\tp-bdd-aplicada\scripts\reportes\reportes_indices.sql"
+GO
+PRINT '...Índices creados.';
+GO
+
+PRINT 'Ejecución de reportes...';
+GO
+:r "C:\tp-bdd-aplicada\scripts\reportes\reportes_ejecucion.sql"
+GO
+PRINT '==================================================';
+PRINT 'Reportes ejecutados correctamente.';
+PRINT '==================================================';
+GO
+
+PRINT 'Creando API de cotización del dólar...';
+GO
+:r "C:\tp-bdd-aplicada\scripts\reportes\API_dolar.sql"
+GO
+PRINT '...API creada correctamente.';
+GO
+
+PRINT 'Ejecutando API de cotización del dólar...';
+GO
+EXEC tpo.sp_actualizar_cotizacion_dolar;
+GO
+SELECT * FROM tpo.cotizacion_dolar;
+GO
+PRINT '...Cotización del dólar actualizada y registrada.';
+GO
+
