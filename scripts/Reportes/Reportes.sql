@@ -80,6 +80,7 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_recaudacion_desA]
 AS
 BEGIN
 	BEGIN TRY
+	SET ANSI_WARNINGS OFF;
 	SELECT
 		'Ordinario' AS Tipo,
 		SUM(ISNULL(de.TotalOrd, 0)) AS Total
@@ -99,6 +100,7 @@ BEGIN
 	 AND e.FechaGeneracion BETWEEN @FechaInicio AND @FechaFin
 
 	FOR XML AUTO, ROOT('Recaudacion')
+	SET ANSI_WARNINGS ON;
 	END TRY
 	BEGIN CATCH
 		PRINT 'ERROR en sp_reporte_recaudacion_desA'
