@@ -8,6 +8,8 @@ BEGIN
 	Direccion VARCHAR(120) NOT NULL,
 	Unidades INT NOT NULL,
 	M2total DECIMAL(10,2) NOT NULL,
+	CuentaAysa CHAR(6),
+	CuentaEdenor CHAR(10)
 
 	CONSTRAINT Pk_Consorcio  PRIMARY KEY(IdConsorcio),
 	CONSTRAINT CK_M2 CHECK(M2total>0)
@@ -34,12 +36,22 @@ BEGIN
 
 	CONSTRAINT Pk_Expensa  PRIMARY KEY(IdExpensa), 
 	CONSTRAINT Ck_Mes CHECK (Mes between 1 and 12 ),
-	--CONSTRAINT Ck_Anio CHECK (Anio BETWEEN 2000 AND 2026), 
-	--CONSTRAINT Ck_Total CHECK(Total>=0),
 	CONSTRAINT Fk_Consorcio_Expensa FOREIGN KEY(IdConsorcio) REFERENCES tpo.Consorcio (IdConsorcio)
 	);
 END
 GO
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
+	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'TipoPersona')
+BEGIN
+	CREATE TABLE tpo.TipoPersona(
+    IdTipo CHAR(1) NOT NULL,
+    Descripcion CHAR(12) NOT NULL
+
+	CONSTRAINT Pk_Tipo_Persona PRIMARY KEY (IdTipo),
+	CONSTRAINT Ck_Tipo_Persona CHECK(IdTipo IN('0','1'))
+	);
+END
+go
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
 	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'Persona')
@@ -51,9 +63,10 @@ BEGIN
     Email VARCHAR(60) NOT NULL,
     Telefono VARCHAR(10) NOT NULL,
     Cuenta VARCHAR(22) NOT NULL,
-    Tipo CHAR(1)
+    IdTipo CHAR(1)
 
-	CONSTRAINT Pk_DNI PRIMARY KEY (DNI) 
+	CONSTRAINT Pk_DNI PRIMARY KEY (DNI)
+	CONSTRAINT FK_Persona_Tipo FOREIGN KEY (IdTipo) REFERENCES tpo.TipoPersona (IdTipo)
 	);
 END
 go
@@ -99,59 +112,40 @@ END
 go
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
-	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'Proveedor')
+	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'Servicio')
 BEGIN
-	CREATE TABLE tpo.Proveedor (
-	IdProveedor INT NOT NULL IDENTITY(1,1),
-	IdConsorcio INT NOT NULL,
-	Nombre VARCHAR (60) NOT NULL,
-	Detalle VARCHAR(50) NULL,
-	Tipo VARCHAR(50) NOT NULL,
+	CREATE TABLE tpo.Servicio (
+	IdServicio INT NOT NULL IDENTITY(1,1),
+	Categoria VARCHAR(50), --GASTOS BANCARIOS
+	Nombre VARCHAR(60), --BANCO CREDICOOP
+	Detalle VARCHAR(50), --
+	NombreConsorcio VARCHAR(20) NULL, --Aclarar el nombre del consorcio aunque no sea FK
 
-	CONSTRAINT PkProveedor PRIMARY KEY(IdProveedor),
-	CONSTRAINT Fk_Proveedor_Consorcio FOREIGN KEY(IdConsorcio) REFERENCES tpo.Consorcio (IdConsorcio)
+	CONSTRAINT Pk_Servicio PRIMARY KEY(IdServicio),
 	);
 END
 go
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
-	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'GastoOrdinario')
+	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'Factura')
 BEGIN
-	CREATE TABLE tpo.GastoOrdinario (
-	IdGastoOrd INT NOT NULL IDENTITY(1,1),
-	IdConsorcio INT NOT NULL,
-	Mes varchar(10) NOT NULL,
-	Categoria VARCHAR(50),
-	IdProveedor INT  NULL, --Puede no aplicar
-	--Detalle VARCHAR(50),
-	Importe DECIMAL(10,2),
-
-	CONSTRAINT PkGastoOrd PRIMARY KEY(IdGastoOrd),
-	CONSTRAINT FkProveedor FOREIGN KEY(IdProveedor) REFERENCES tpo.Proveedor(IdProveedor),
-	CONSTRAINT FK_Consorcio_GastoOrd FOREIGN KEY(IdConsorcio) REFERENCES tpo.Consorcio(IdConsorcio),
-	CONSTRAINT Importe CHECK(Importe>0)
-	);
-END
-go
-
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
-	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'GastoExtraordinario')
-BEGIN
-	CREATE TABLE tpo.GastoExtraordinario (
-	IdGastoExt INT NOT NULL IDENTITY(1,1),
-	IdConsorcio INT NOT NULL,
-	Mes INT NOT NULL,
-	Descripcion VARCHAR(50),
-	EnCuotas BIT NOT NULL, --1 si 0 no
+	CREATE TABLE tpo.Factura (
+	IdFactura INT NOT NULL IDENTITY(1,1),
+	IdExpensa INT NOT NULL,
+	IdServicio INT NOT NULL,
+	NombreConsorcio VARCHAR(20) NULL, --Aclarar el nombre del consorcio aunque no sea FK
+	Mes VARCHAR(10) NOT NULL,
+	Detalle VARCHAR(50) NULL, --BANCARIOS
+	Tipo CHAR(1) NOT NULL, --O (ordinario)
+	Importe DECIMAL(10,2) NOT NULL,
+	EnCuotas CHAR(1) NOT NULL, --1 si 0 no
 	CuotaActual INT NULL, --Puede no aplicar en cuotas
-	ImporteCuota DECIMAL(10,2) NULL,
-	ImporteTotal DECIMAL(10,2) NOT NULL,
+	CuotasTotales INT NULL, --Puede no aplicar en cuotas
 
-	CONSTRAINT PkGastoExt PRIMARY KEY(IdGastoExt),
-	CONSTRAINT FKConsorcio_GastoExt FOREIGN KEY(IdConsorcio) REFERENCES tpo.Consorcio(IdConsorcio),
-	CONSTRAINT CkCuotaActual CHECK(CuotaActual>=1),
-	CONSTRAINT Mess CHECK(Mes between 1 and 12),
-	CONSTRAINT ImporteTotal CHECK(ImporteTotal>0)
+	CONSTRAINT Pk_Factura PRIMARY KEY(IdFactura),
+	CONSTRAINT Fk_Factura_Expensa FOREIGN KEY(IdExpensa) REFERENCES tpo.Expensa (IdExpensa),
+	CONSTRAINT Fk_Factura_Servicio FOREIGN KEY (IdServicio) REFERENCES tpo.Servicio (IdServicio),
+	CONSTRAINT Ck_Tipo_Gasto CHECK(Tipo IN('O','E'))
 	);
 END
 go
@@ -189,7 +183,7 @@ BEGIN
 	CREATE TABLE tpo.Pago (
 	IdPago INT NOT NULL,
 	IdDetalleExp INT NULL,
-	IdUf INT NULL,
+	--IdUf INT NULL,
 	--MesPago INT NOT NULL,
 	FechaPago DATE NOT NULL, 
 	Cuenta varchar(22) NOT NULL,
@@ -197,11 +191,8 @@ BEGIN
 
 	CONSTRAINT Pk_Pago PRIMARY KEY (IdPago),
 	CONSTRAINT Fk_Pago_DetalleExp FOREIGN KEY (IdDetalleExp) REFERENCES tpo.DetalleExpensa(IdDetalle),
-	CONSTRAINT Fk_Pago_Uf FOREIGN KEY (IdUf) REFERENCES tpo.UnidadFuncional(IdUf),
+	--CONSTRAINT Fk_Pago_Uf FOREIGN KEY (IdUf) REFERENCES tpo.UnidadFuncional(IdUf),
 	CONSTRAINT Ck_Importe CHECK (Importe > 0)
 	);
 END
 go
-
-
-
