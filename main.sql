@@ -31,7 +31,17 @@ PRINT 'Ejecutando script de TABLAS...';
 PRINT '...Tablas creadas.';
 GO 
 
+--CREAMOS LAS CLAVES DE ENCRIPTADO
+PRINT 'Creando la clave de cifrado...';
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarClaveEncriptado.sql"
 
+--CREAMOS LOS TRIGGER
+PRINT 'Creando Triggers...';
+go
+:r "C:\tp-bdd-aplicada\scripts\triggers\cifrarDatosPersonales.sql"
+PRINT '...Triggers creados.';
+GO 
 
 --CREAMOS LOS SP
 PRINT 'Creando Stored Procedures...';

@@ -40,6 +40,7 @@ GO
 
 CREATE OR ALTER PROCEDURE [tpo].[sp_cargarInquilinoPropietario]
     @RutaArchivoCSV NVARCHAR(255)
+WITH EXECUTE AS OWNER
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -99,7 +100,7 @@ BEGIN
         RETURN -1;
     END CATCH;
 
-  
+    PRINT 'Insert Personas'
     ;WITH personas_sin_duplicados AS (
         SELECT
             tpo.corregirTexto(nombre_csv) AS nombre,
@@ -123,24 +124,23 @@ BEGIN
         WHERE TRY_CAST(dni_csv AS INT) IS NOT NULL
     )
 
-    
     INSERT INTO tpo.Persona (
+        DNI,
         Nombre,
         Apellido,
-        DNI,
         Email,
         Telefono,
         Cuenta,
         IdTipo
     )
     SELECT 
-        p.nombre,
-        p.apellido,
         p.dni,
-        p.email,
-        p.telefono,
-        p.cuenta,
-        p.tipo
+        CONVERT(VARBINARY(MAX), P.Nombre),
+        CONVERT(VARBINARY(MAX), P.apellido),
+        CONVERT(VARBINARY(MAX), P.email),
+        CONVERT(VARBINARY(MAX), P.telefono),
+        CONVERT(VARBINARY(MAX), P.cuenta),
+        P.tipo
     FROM personas_sin_duplicados p
     WHERE p.rn = 1
       AND p.dni IS NOT NULL
