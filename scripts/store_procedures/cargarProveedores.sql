@@ -17,8 +17,8 @@ BEGIN
     CREATE TABLE #prov_staging (
         ColumnaVacia VARCHAR(100),
         Tipo VARCHAR(100),
-        Nombre_o_Detalle1 VARCHAR(100),
-        Nombre_o_Detalle2 VARCHAR(100),
+        Nombre VARCHAR(100),
+        Detalle VARCHAR(100),
         NombreConsorcio VARCHAR(100)
     );
 
@@ -45,22 +45,29 @@ BEGIN
     END CATCH;
     
     BEGIN TRY
-        INSERT INTO tpo.Proveedor (
-            IdConsorcio,
-            Nombre,
-            Detalle,
-            Tipo
+        INSERT INTO tpo.Servicio(
+            Categoria,
+			Nombre,
+			--Detalle,
+			NombreConsorcio
         )
         SELECT
-            c.IdConsorcio,
-            TRIM(s.Nombre_o_Detalle1) AS Nombre,
-            NULLIF(TRIM(s.Nombre_o_Detalle2), '') AS Detalle,
-            TRIM(s.Tipo) AS Tipo
+			TRIM(s.Tipo) AS Tipo,
+			REPLACE(TRIM(s.Nombre), 'Ã“', 'O')
+			+ CASE
+					WHEN TRIM(s.Detalle) IS NOT NULL AND TRIM(s.Detalle) <> ''
+					THEN ' - ' + TRIM(s.Detalle)
+					ELSE ''
+			END	
+			as Nombre,
+            --TRIM(s.Nombre) AS Nombre,
+            --NULLIF(TRIM(Detalle2), '') AS Detalle,
+            c.Nombre
         FROM #prov_staging s
         INNER JOIN tpo.Consorcio c ON TRIM(s.NombreConsorcio) = c.Nombre
-        WHERE s.Tipo IS NOT NULL 
+        WHERE s.Tipo IS NOT NULL
 
-        PRINT 'INSERT completado. ' + CAST(@@ROWCOUNT AS VARCHAR) + ' nuevos proveedores insertados.';
+        PRINT 'INSERT completado. ' + CAST(@@ROWCOUNT AS VARCHAR) + ' servicios insertados';
 
     END TRY
     BEGIN CATCH
