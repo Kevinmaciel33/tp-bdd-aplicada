@@ -1,4 +1,4 @@
---CREACION SP REPORTES
+--CREACION DE REPORTES
 
 --1) PRIMER REPORTE- FLUJO DE CAJA SEMANAL
 --RECAUDACION POR PAGOS ORDINARIOS Y EXTRAORDINARIOS DE CADA SEMANA 
@@ -52,8 +52,8 @@ BEGIN
 				uf.NroUf,
 				p.Importe
 		  FROM tpo.Pago p
-		  INNER JOIN tpo.UnidadFuncional uf ON p.IdUf = uf.IdUf
 		  INNER JOIN tpo.DetalleExpensa de ON p.IdDetalleExp = de.IdDetalle
+		  INNER JOIN tpo.UnidadFuncional uf ON de.IdUf = uf.IdUf
 		  INNER JOIN tpo.Expensa e ON de.IdExpensa = e.IdExpensa
 		  WHERE e.IdConsorcio = @IdConsorcio
 			AND YEAR(p.FechaPago) = @Anio
@@ -81,6 +81,7 @@ AS
 BEGIN
 	BEGIN TRY
 	SET ANSI_WARNINGS OFF;
+
 	SELECT
 		'Ordinario' AS Tipo,
 		SUM(ISNULL(de.TotalOrd, 0)) AS Total
@@ -93,13 +94,14 @@ BEGIN
 
 	 SELECT 
 		'Extraordinario' AS Tipo,
-		SUM(ISNULL(de.TotalOrd, 0)) AS Total
+		SUM(ISNULL(de.TotalExt, 0)) AS Total
 	FROM tpo.DetalleExpensa de
 	INNER JOIN tpo.Expensa e ON e.IdExpensa = de.IdExpensa
 	WHERE e.IdConsorcio = @IdConsorcio
 	 AND e.FechaGeneracion BETWEEN @FechaInicio AND @FechaFin
 
 	FOR XML AUTO, ROOT('Recaudacion')
+
 	SET ANSI_WARNINGS ON;
 	END TRY
 	BEGIN CATCH
@@ -110,7 +112,6 @@ BEGIN
 END;
 GO
 
-
 --4) CUARTO REPORTE - TOP 5 MESES DE MAYORES GASTOS Y TOP 5 MESES DE MAYORES INGRESOS
 
 CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_top5_gastos_ingresos]
@@ -118,19 +119,28 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_top5_gastos_ingresos]
 AS
 BEGIN
  BEGIN TRY
-	SELECT TOP 5 'Gasto Ordinario' AS Tipo, gor.Mes AS Mes, SUM(gor.Importe) AS Total
-	FROM tpo.GastoOrdinario gor
-	WHERE gor.IdConsorcio = @IdConsorcio 
-	GROUP BY gor.Mes
-	ORDER BY Total DESC;
+	SELECT TOP 5
+        CASE WHEN f.Tipo = 'O' THEN 'Gasto Ordinario' ELSE 'Gasto Extraordinario' END AS Tipo,
+        f.Mes,
+        SUM(f.Importe) AS Total
+    FROM tpo.Factura f
+    INNER JOIN tpo.Expensa e ON f.IdExpensa = e.IdExpensa
+    WHERE e.IdConsorcio = @IdConsorcio
+    GROUP BY f.Tipo, f.Mes
+    ORDER BY Total DESC;
 
-	SELECT TOP 5 'Ingreso' AS Tipo, MONTH(p.FechaPago) AS Mes, SUM(p.Importe) AS Total
-	FROM tpo.Pago p
-	INNER JOIN tpo.DetalleExpensa de ON p.IdDetalleExp = de.IdDetalle
-	INNER JOIN tpo.Expensa e ON e.IdExpensa = de.IdExpensa
-	WHERE e.IdConsorcio = @IdConsorcio
-	GROUP BY MONTH(p.FechaPago)
-	ORDER BY Total DESC;
+
+	SELECT TOP 5 
+        'Ingreso' AS Tipo,
+        MONTH(p.FechaPago) AS Mes,
+        SUM(p.Importe) AS Total
+    FROM tpo.Pago p
+    INNER JOIN tpo.DetalleExpensa de ON p.IdDetalleExp = de.IdDetalle
+    INNER JOIN tpo.Expensa e ON e.IdExpensa = de.IdExpensa
+    WHERE e.IdConsorcio = @IdConsorcio
+    GROUP BY MONTH(p.FechaPago)
+    ORDER BY Total DESC;
+
  END TRY
  BEGIN CATCH
 	PRINT 'ERROR en sp_reporte_top5_gastos_ingresos:'
@@ -147,46 +157,33 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_top3_morosidad]
 AS
 BEGIN
 	BEGIN TRY 
-	
-	OPEN SYMMETRIC KEY ClaveTP
-    DECRYPTION BY CERTIFICATE CertificadoTP;
-
 	;WITH DeudaPorPropietario AS (
-	SELECT 
-		per.DNI,
-		CONVERT(VARCHAR(MAX), DecryptByKey(per.Nombre))   AS Nombre,
-        CONVERT(VARCHAR(MAX), DecryptByKey(per.Apellido)) AS Apellido,
-        CONVERT(VARCHAR(MAX), DecryptByKey(per.Email))    AS Email,
-        CONVERT(VARCHAR(MAX), DecryptByKey(per.Telefono)) AS Telefono,
-		SUM(ISNULL(de.Total, 0)) AS TotalExpensas,
-        SUM(ISNULL(pg.Importe, 0)) AS TotalPagos,
-        SUM(ISNULL(de.Total, 0)) - SUM(ISNULL(pg.Importe, 0)) AS Deuda
-	FROM tpo.persona per
-	INNER JOIN tpo.UnidadFuncional uf on per.Cuenta = uf.Cuenta
-	LEFT JOIN tpo.DetalleExpensa de ON uf.IdUf = de.IdUf 
-    LEFT JOIN tpo.Pago pg ON uf.IdUf = pg.IdUf
-    WHERE per.Tipo = 'P'  -- solo propietarios
-    GROUP BY per.DNI, per.Nombre, per.Apellido, per.Email, per.Telefono
+	SELECT
+            per.DNI,
+            CONVERT(VARCHAR(MAX), per.Nombre) AS Nombre,
+            CONVERT(VARCHAR(MAX), per.Apellido) AS Apellido,
+            CONVERT(VARCHAR(MAX), per.Email) AS Email,
+            CONVERT(VARCHAR(MAX), per.Telefono) AS Telefono,
+            SUM(ISNULL(de.Total,0)) AS TotalExpensas,
+            SUM(ISNULL(pg.Importe,0)) AS TotalPagos,
+            SUM(ISNULL(de.Total,0)) - SUM(ISNULL(pg.Importe,0)) AS Deuda
+        FROM tpo.UnidadFuncional uf
+        INNER JOIN tpo.Persona per ON uf.IdPropietario = per.DNI
+        LEFT JOIN tpo.DetalleExpensa de ON uf.IdUf = de.IdUf
+        LEFT JOIN tpo.Pago pg ON de.IdDetalle = pg.IdDetalleExp
+        GROUP BY per.DNI, per.Nombre, per.Apellido, per.Email, per.Telefono
     )
 	SELECT TOP 3 *
 	FROM DeudaPorPropietario
 	ORDER BY Deuda DESC;
-
-	CLOSE SYMMETRIC KEY ClaveTP;
-
 	END TRY
 	BEGIN CATCH
 		PRINT 'ERROR en sp_reporte_top3_morosidad:'
 		PRINT ERROR_MESSAGE();
-
-        IF EXISTS (SELECT 1 FROM sys.openkeys WHERE key_name = 'ClaveTP')
-            CLOSE SYMMETRIC KEY ClaveTP;
-
 		THROW;
 	END CATCH
 END;
 GO
-
 
 --6) SEXTO REPORTE - FECHAS DE PAGO DE EXPENSAS ORDINARIAS DE CADA UF
 -- + CANTIDAD DE DIAS QUE PASAN ENTRE UN PAGO Y EL SIGUIENTE 
@@ -198,16 +195,16 @@ AS
 BEGIN
 	BEGIN TRY
     WITH PagosOrdenados AS (
-        SELECT 
-            p.IdUf,
+        SELECT
+            de.IdUf,
             p.FechaPago,
-            LAG(p.FechaPago) OVER (PARTITION BY p.IdUf ORDER BY p.FechaPago) AS PagoAnterior
+            LAG(p.FechaPago) OVER (PARTITION BY de.IdUf ORDER BY p.FechaPago) AS PagoAnterior
         FROM tpo.Pago p
         INNER JOIN tpo.DetalleExpensa de ON p.IdDetalleExp = de.IdDetalle
         INNER JOIN tpo.Expensa e ON e.IdExpensa = de.IdExpensa
-        WHERE e.IdConsorcio = @IdConsorcio 
-		 AND p.IdUf = @IdUf 
-		 AND p.FechaPago >= @FechaDesde
+        WHERE e.IdConsorcio = @IdConsorcio
+          AND de.IdUf = @IdUf
+          AND p.FechaPago >= @FechaDesde
     )
     SELECT 
         IdUf,
@@ -215,6 +212,7 @@ BEGIN
         DATEDIFF(DAY, PagoAnterior, FechaPago) AS DiasEntrePagos
     FROM PagosOrdenados
     FOR XML AUTO, ROOT('Pagos');
+
 	END TRY
 	BEGIN CATCH
 		PRINT 'ERROR en sp_reporte_dias_entre_pagos:' 
@@ -223,3 +221,5 @@ BEGIN
 	END CATCH
 END;
 GO
+
+
