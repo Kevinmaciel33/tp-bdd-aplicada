@@ -69,7 +69,13 @@ go
 BEGIN TRANSACTION CargaDatos;
 
 BEGIN TRY
+    -- Paso 0
+    PRINT 'Cargando TipoPersona...';
+    EXEC tpo.sp_CargarTipoPersona @IdTipo = '0', @Descripcion = 'P';
+    EXEC tpo.sp_CargarTipoPersona @IdTipo = '1', @Descripcion = 'I';
+    PRINT '... TipoPersona cargados.';
     -- Paso 1
+
     PRINT 'Cargando Inquilinos/Propietarios...';
     EXEC tpo.sp_cargarInquilinoPropietario 'C:\tp-bdd-aplicada\archivos_a_importar\Inquilino-propietarios-datos.csv';
     PRINT '... Inquilinos/Propietarios cargados.';
