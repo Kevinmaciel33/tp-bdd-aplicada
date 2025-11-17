@@ -1,34 +1,49 @@
---INDICES PARA OPTIMIZAR REPORTES
+-- ======================================
+-- ÍNDICES PARA OPTIMIZAR REPORTES
+-- ======================================
 
---Reporte 1 y 2: Búsqueda y agrupamiento por fecha de pago y consorcio
-CREATE INDEX IX_Pago_FechaPago ON tpo.Pago(FechaPago);
-GO
-CREATE INDEX IX_Expensa_IdConsorcio ON tpo.Expensa(IdConsorcio);
-GO
-
---Reporte 2 y 3: uso  de IdDetalleExp e IdExpensa en joins
-CREATE INDEX IX_DetalleExpensa_IdExpensa ON tpo.DetalleExpensa(IdExpensa);
-GO
-CREATE INDEX IX_Pago_IdDetalleExp ON tpo.Pago(IdDetalleExp);
+-- Reportes 1, 2, 4 y 6: accesos por fecha de pago
+CREATE INDEX IX_Pago_FechaPago 
+    ON tpo.Pago(FechaPago);
 GO
 
---Reporte 4: Agrupación por mes en gastos ordinarios
-CREATE INDEX IX_GastoOrdinario_Mes ON tpo.GastoOrdinario(Mes);
-GO
-CREATE INDEX IX_GastoOrdinario_IdConsorcio ON tpo.GastoOrdinario(IdConsorcio);
-GO
-
---Reporte 5: Relación Persona - UnidadFuncional - Pagos
-CREATE INDEX IX_Persona_DNI ON tpo.Persona(DNI);
-GO
-CREATE INDEX IX_UnidadFuncional_IdPropietario ON tpo.UnidadFuncional(IdPropietario);
-GO
-CREATE INDEX IX_UnidadFuncional_Cuenta ON tpo.UnidadFuncional(Cuenta);
-GO
-CREATE INDEX IX_Pago_IdUf ON tpo.Pago(IdUf);
+-- Reportes 1, 2, 3, 4, 6: filtrar por consorcio
+CREATE INDEX IX_Expensa_IdConsorcio 
+    ON tpo.Expensa(IdConsorcio);
 GO
 
---Reporte 6: Días entre pagos (IdUf + FechaPago)
-CREATE INDEX IX_Pago_IdUf_FechaPago ON tpo.Pago(IdUf, FechaPago);
+-- Reportes 2, 3, 4, 6: joins por IdExpensa
+CREATE INDEX IX_DetalleExpensa_IdExpensa
+    ON tpo.DetalleExpensa(IdExpensa);
 GO
+
+-- Reportes 1, 2, 5, 6: joins por IdDetalleExp
+CREATE INDEX IX_Pago_IdDetalleExp
+    ON tpo.Pago(IdDetalleExp);
+GO
+
+-- Reportes 2, 5, 6: búsquedas por IdUf
+CREATE INDEX IX_DetalleExpensa_IdUf
+    ON tpo.DetalleExpensa(IdUf);
+GO
+
+-- Reporte 5: propietarios
+CREATE INDEX IX_UnidadFuncional_IdPropietario
+    ON tpo.UnidadFuncional(IdPropietario);
+GO
+
+-- Reporte 4 (gastos): por mes en FACTURA
+CREATE INDEX IX_Factura_Mes
+    ON tpo.Factura(Mes);
+GO
+CREATE INDEX IX_Factura_IdExpensa
+    ON tpo.Factura(IdExpensa);
+GO
+
+-- Reporte 6: filtro + ordenamiento por fecha para cada UF
+CREATE INDEX IX_DetalleExpensa_IdUf_Fecha
+    ON tpo.DetalleExpensa(IdUf);
+GO
+
+
 
