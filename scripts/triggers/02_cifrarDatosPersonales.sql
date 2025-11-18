@@ -1,3 +1,14 @@
+/*
+Este trigger se ejecuta en lugar del INSERT sobre la tabla `tpo.Persona` y se encarga de cifrar automáticamente los datos personales sensibles antes de guardarlos en la base de datos.
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 DROP TRIGGER IF EXISTS [tpo].[cifrarDatosPersonales];
 GO
 
