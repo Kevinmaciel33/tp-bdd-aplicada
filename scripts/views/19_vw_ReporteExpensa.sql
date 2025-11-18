@@ -1,3 +1,14 @@
+/*
+Este script crea la vista para a partir de ella generar el csv de salida de Expensa.
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila √Ålvarez Da Silva*/
 CREATE OR ALTER VIEW tpo.vw_ReporteExpensa AS
 WITH Movimientos AS (
     SELECT
@@ -19,13 +30,13 @@ WITH Movimientos AS (
     FROM tpo.DetalleExpensa d
 )
 SELECT 
-    'AdministraciÛn Altos De Saint Just' AS NombreAdministracion,
+    'Administraci√≥n Altos De Saint Just' AS NombreAdministracion,
     'Arieta 1234, GBA' AS DireccionAdministracion,
     '011-5555-000' AS TelefonoAdministracion,
     'administracion@altosdesaintjust.com.ar' AS EmailAdministracion,
-	'Formas de pago: DepÛsito o transferencia a la cuenta corriente del Banco N∞ 123456' AS FormaDePago,
+	'Formas de pago: Dep√≥sito o transferencia a la cuenta corriente del Banco N¬∞ 123456' AS FormaDePago,
 
-    -- Datos din·micos
+    -- Datos din√°micos
     c.IdConsorcio,
     c.Nombre AS NombreConsorcio,
     e.Mes,
