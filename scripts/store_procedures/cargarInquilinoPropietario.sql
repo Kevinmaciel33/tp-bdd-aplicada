@@ -40,7 +40,6 @@ GO
 
 CREATE OR ALTER PROCEDURE [tpo].[sp_cargarInquilinoPropietario]
     @RutaArchivoCSV NVARCHAR(255)
-WITH EXECUTE AS OWNER
 AS
 BEGIN
     SET NOCOUNT ON;
