@@ -1,5 +1,15 @@
 --Habilitamos acceso a datos externos
 --API DOLAR
+/*
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 DROP TABLE IF EXISTS tpo.cotizacion_dolar;
 
 CREATE TABLE tpo.cotizacion_dolar (
