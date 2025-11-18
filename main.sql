@@ -206,6 +206,13 @@ GO
 PRINT '...Cotización del dólar actualizada y registrada.';
 GO
 
+--CREAMOS LAS VIEWS
+PRINT 'Creando VIEWS...';
+GO
+:r "C:\tp-bdd-aplicada\scripts\views\vw_ReporteDetalleExpensa.sql"
+PRINT '...VIEWS creados.';
+GO 
+
 --CREAMOS LOS ROLES
 PRINT 'Creando los roles y permisos...';
 go
