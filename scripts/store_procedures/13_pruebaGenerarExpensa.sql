@@ -1,3 +1,14 @@
+/*
+Este script genera la Expensa y el Detalle Expensa por mes, por consorcio. Se envia por parametro al SP el numero de mes, el año y el id del consorcio
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 GO
 DROP FUNCTION IF EXISTS tpo.f_obtenerQuintoDiaHabil;
 GO
