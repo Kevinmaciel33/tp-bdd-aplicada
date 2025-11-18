@@ -152,7 +152,7 @@ BEGIN TRANSACTION CargaExpensa;
 BEGIN TRY
 	EXEC tpo.sp_generarExpensa 6,2025,1 ---Mes de la expensa q se quiere generar, año, id del consorcio
 	PRINT 'TODO OK'
-
+	COMMIT TRANSACTION CargaExpensa;
 END TRY
 BEGIN CATCH
 	IF @@TRANCOUNT > 0
