@@ -182,6 +182,7 @@ BEGIN
 	IdPago INT NOT NULL,
 	IdDetalleExp INT NULL,
 	IdUf INT NULL,
+	IdConsorcio INT NULL,
 	FechaPago DATE NOT NULL, 
 	Cuenta varchar(22) NOT NULL,
 	Importe DECIMAL(10,2) NOT NULL,
