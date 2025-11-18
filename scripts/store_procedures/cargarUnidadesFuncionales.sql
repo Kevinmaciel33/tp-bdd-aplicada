@@ -65,9 +65,7 @@ BEGIN
 
     BEGIN TRY
         INSERT INTO tpo.UnidadFuncional (
-            IdConsorcio, 
-            IdPropietario,      --null por ahora
-            IdInquilino,        --null por ahora
+            IdConsorcio,       
             NroUf, 
             Cuenta,           --null por ahora
             Piso, 
@@ -76,9 +74,7 @@ BEGIN
             M2
         )
         SELECT 
-            c.IdConsorcio,
-            NULL,            
-            NULL,            
+            c.IdConsorcio,           
             TRY_CAST(s.nro_uf_csv AS INT),
             NULL,        
             s.piso_csv,
