@@ -1,4 +1,14 @@
 -- ÍNDICES PARA OPTIMIZAR REPORTES
+/*
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 -- Reportes 1, 2, 4 y 6: accesos por fecha de pago
 IF NOT EXISTS (
     SELECT 1 FROM sys.indexes 
