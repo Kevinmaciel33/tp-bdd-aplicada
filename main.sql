@@ -65,7 +65,6 @@ go
 PRINT '...Stored Procedures creados.';
 GO
 
-
 PRINT 'Iniciando carga de DATOS...';
 go
 BEGIN TRANSACTION CargaDatos;
@@ -179,3 +178,7 @@ GO
 PRINT '...Cotización del dólar actualizada y registrada.';
 GO
 
+--CREAMOS LOS ROLES
+PRINT 'Creando los roles y permisos...';
+go
+:r "C:\tp-bdd-aplicada\scripts\roles_permisos\permisos.sql"
