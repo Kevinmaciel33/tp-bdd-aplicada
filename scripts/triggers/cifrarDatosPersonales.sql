@@ -1,4 +1,7 @@
-CREATE OR ALTER TRIGGER cifrarDatosPersonales
+DROP TRIGGER [tpo].[cifrarDatosPersonales]
+go
+
+CREATE OR ALTER TRIGGER [tpo].[cifrarDatosPersonales]
 ON [tpo].[Persona]
 INSTEAD OF INSERT
 AS

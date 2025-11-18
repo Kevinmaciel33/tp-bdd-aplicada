@@ -33,12 +33,12 @@ GO
 
 --CREAMOS LAS CLAVES DE ENCRIPTADO
 PRINT 'Creando la clave de cifrado...';
-go
+GO
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarClaveEncriptado.sql"
 
 --CREAMOS LOS TRIGGER
 PRINT 'Creando Triggers...';
-go
+GO
 :r "C:\tp-bdd-aplicada\scripts\triggers\cifrarDatosPersonales.sql"
 PRINT '...Triggers creados.';
 GO 
