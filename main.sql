@@ -46,6 +46,8 @@ GO
 --CREAMOS LOS SP
 PRINT 'Creando Stored Procedures...';
 go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarTipoPersona.sql"
+go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilinoPropietario.sql"
 go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarConsorcios.sql"
@@ -71,8 +73,8 @@ BEGIN TRANSACTION CargaDatos;
 BEGIN TRY
     -- Paso 0
     PRINT 'Cargando TipoPersona...';
-    EXEC tpo.sp_CargarTipoPersona @IdTipo = '0', @Descripcion = 'P';
-    EXEC tpo.sp_CargarTipoPersona @IdTipo = '1', @Descripcion = 'I';
+    EXEC tpo.sp_cargarTipoPersona @IdTipo = '0', @Descripcion = 'P';
+    EXEC tpo.sp_cargarTipoPersona @IdTipo = '1', @Descripcion = 'I';
     PRINT '... TipoPersona cargados.';
     -- Paso 1
 
