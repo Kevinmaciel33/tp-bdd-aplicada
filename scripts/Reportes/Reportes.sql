@@ -157,13 +157,17 @@ CREATE OR ALTER PROCEDURE [tpo].[sp_reporte_top3_morosidad]
 AS
 BEGIN
 	BEGIN TRY 
+
+	OPEN SYMMETRIC KEY ClaveTP 
+    DECRYPTION BY CERTIFICATE CertificadoTP;
+
 	;WITH DeudaPorPropietario AS (
 	SELECT
             per.DNI,
-            CONVERT(VARCHAR(MAX), per.Nombre) AS Nombre,
-            CONVERT(VARCHAR(MAX), per.Apellido) AS Apellido,
-            CONVERT(VARCHAR(MAX), per.Email) AS Email,
-            CONVERT(VARCHAR(MAX), per.Telefono) AS Telefono,
+            CONVERT(VARCHAR(MAX), DECRYPTBYKEY(per.Nombre)) AS Nombre,
+            CONVERT(VARCHAR(MAX), DECRYPTBYKEY(per.Apellido)) AS Apellido,
+            CONVERT(VARCHAR(MAX), DECRYPTBYKEY(per.Email)) AS Email,
+            CONVERT(VARCHAR(MAX), DECRYPTBYKEY(per.Telefono)) AS Telefono,
             SUM(ISNULL(de.Total,0)) AS TotalExpensas,
             SUM(ISNULL(pg.Importe,0)) AS TotalPagos,
             SUM(ISNULL(de.Total,0)) - SUM(ISNULL(pg.Importe,0)) AS Deuda
@@ -176,8 +180,12 @@ BEGIN
 	SELECT TOP 3 *
 	FROM DeudaPorPropietario
 	ORDER BY Deuda DESC;
+	CLOSE SYMMETRIC KEY ClaveTP;
 	END TRY
 	BEGIN CATCH
+		IF (SELECT key_guid FROM sys.open_keys WHERE key_name = 'ClaveTP') IS NOT NULL
+            CLOSE SYMMETRIC KEY ClaveTP;
+			
 		PRINT 'ERROR en sp_reporte_top3_morosidad:'
 		PRINT ERROR_MESSAGE();
 		THROW;
