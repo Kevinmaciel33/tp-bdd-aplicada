@@ -134,7 +134,7 @@ BEGIN
 	IdServicio INT NULL,
 	NombreConsorcio VARCHAR(20) NULL, --Aclarar el nombre del consorcio aunque no sea FK
 	Mes VARCHAR(10) NOT NULL,
-	Detalle VARCHAR(50) NULL, --BANCARIOS
+	Detalle VARCHAR(60) NULL, --BANCARIOS
 	Tipo CHAR(1) NOT NULL, --O (ordinario)
 	Importe DECIMAL(10,2) NOT NULL,
 	EnCuotas CHAR(1) NOT NULL, --1 si 0 no
