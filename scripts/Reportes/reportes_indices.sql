@@ -1,49 +1,105 @@
--- ======================================
 -- ÍNDICES PARA OPTIMIZAR REPORTES
--- ======================================
-
 -- Reportes 1, 2, 4 y 6: accesos por fecha de pago
-CREATE INDEX IX_Pago_FechaPago 
-    ON tpo.Pago(FechaPago);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Pago_FechaPago' 
+      AND object_id = OBJECT_ID('tpo.Pago')
+)
+BEGIN
+    CREATE INDEX IX_Pago_FechaPago ON tpo.Pago(FechaPago);
+END
 GO
 
 -- Reportes 1, 2, 3, 4, 6: filtrar por consorcio
-CREATE INDEX IX_Expensa_IdConsorcio 
-    ON tpo.Expensa(IdConsorcio);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Expensa_IdConsorcio' 
+      AND object_id = OBJECT_ID('tpo.Expensa')
+)
+BEGIN
+    CREATE INDEX IX_Expensa_IdConsorcio ON tpo.Expensa(IdConsorcio);
+END
 GO
 
 -- Reportes 2, 3, 4, 6: joins por IdExpensa
-CREATE INDEX IX_DetalleExpensa_IdExpensa
-    ON tpo.DetalleExpensa(IdExpensa);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_DetalleExpensa_IdExpensa' 
+      AND object_id = OBJECT_ID('tpo.DetalleExpensa')
+)
+BEGIN
+    CREATE INDEX IX_DetalleExpensa_IdExpensa ON tpo.DetalleExpensa(IdExpensa);
+END
 GO
+
 
 -- Reportes 1, 2, 5, 6: joins por IdDetalleExp
-CREATE INDEX IX_Pago_IdDetalleExp
-    ON tpo.Pago(IdDetalleExp);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Pago_IdDetalleExp' 
+      AND object_id = OBJECT_ID('tpo.Pago')
+)
+BEGIN
+    CREATE INDEX IX_Pago_IdDetalleExp ON tpo.Pago(IdDetalleExp);
+END
 GO
 
+
 -- Reportes 2, 5, 6: búsquedas por IdUf
-CREATE INDEX IX_DetalleExpensa_IdUf
-    ON tpo.DetalleExpensa(IdUf);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_DetalleExpensa_IdUf' 
+      AND object_id = OBJECT_ID('tpo.DetalleExpensa')
+)
+BEGIN
+    CREATE INDEX IX_DetalleExpensa_IdUf ON tpo.DetalleExpensa(IdUf);
+END
 GO
 
 -- Reporte 5: propietarios
-CREATE INDEX IX_UnidadFuncional_IdPropietario
-    ON tpo.UnidadFuncional(IdPropietario);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_UnidadFuncional_IdPropietario' 
+      AND object_id = OBJECT_ID('tpo.UnidadFuncional')
+)
+BEGIN
+    CREATE INDEX IX_UnidadFuncional_IdPropietario ON tpo.UnidadFuncional(IdPropietario);
+END
 GO
+
 
 -- Reporte 4 (gastos): por mes en FACTURA
-CREATE INDEX IX_Factura_Mes
-    ON tpo.Factura(Mes);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Factura_Mes' 
+      AND object_id = OBJECT_ID('tpo.Factura')
+)
+BEGIN
+    CREATE INDEX IX_Factura_Mes ON tpo.Factura(Mes);
+END
 GO
-CREATE INDEX IX_Factura_IdExpensa
-    ON tpo.Factura(IdExpensa);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_Factura_IdExpensa' 
+      AND object_id = OBJECT_ID('tpo.Factura')
+)
+BEGIN
+    CREATE INDEX IX_Factura_IdExpensa ON tpo.Factura(IdExpensa);
+END
 GO
 
+
 -- Reporte 6: filtro + ordenamiento por fecha para cada UF
-CREATE INDEX IX_DetalleExpensa_IdUf_Fecha
-    ON tpo.DetalleExpensa(IdUf);
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes 
+    WHERE name = 'IX_DetalleExpensa_IdUf_Fecha' 
+      AND object_id = OBJECT_ID('tpo.DetalleExpensa')
+)
+BEGIN
+    CREATE INDEX IX_DetalleExpensa_IdUf_Fecha ON tpo.DetalleExpensa(IdUf);
+END
 GO
+
 
 
 
