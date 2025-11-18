@@ -1,3 +1,20 @@
+/*18/11/2025
+
+Com2900G10
+
+Grupo 10
+
+Bases de datos aplicadas
+
+Integrantes:
+
+-Kevin Maciel
+
+-Marcos kouvach
+
+-Agostina salas
+
+-Keila Álvarez Da Silva*/
 PRINT 'Iniciando configuración de seguridad...'
 
 IF NOT EXISTS (SELECT * FROM sys.symmetric_keys WHERE name = '##MS_DatabaseMasterKey##')
