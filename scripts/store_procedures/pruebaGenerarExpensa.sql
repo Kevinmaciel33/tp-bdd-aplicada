@@ -76,8 +76,8 @@ begin
 	set nocount on;
 	--DATOS DE EXPENSA MAYO (FECHAS)
 	DECLARE @FechaGeneracion DATE = tpo.f_obtenerQuintoDiaHabil(@Anio,@Mes); --QUINTO DIA HABIL--ejemplo: 5/5/2025
-	DECLARE @FechaVTO1 DATE = DATEADD(day,5,@FechaGeneracion); --5 DIAS DESPUES DE LA GENERACION--ejemplo: 10/5/2025
-	DECLARE @FechaVTO2 DATE = DATEADD(day,5,@FechaVTO1); --VTO1 + 5 DIAS--ejemplo: 15/5/2025
+	DECLARE @FechaVTO1 DATE = DATEADD(day,10,@FechaGeneracion); --5 DIAS DESPUES DE LA GENERACION--ejemplo: 10/5/2025
+	DECLARE @FechaVTO2 DATE = DATEADD(day,10,@FechaVTO1); --VTO1 + 5 DIAS--ejemplo: 15/5/2025
 
 	--DATOS ABRIL, VTO1, VTO2....
 	DECLARE @MesAnterior INT = @Mes - 1
@@ -132,6 +132,14 @@ begin
 	
 	PRINT 'Expensa del consorcio: ' + CAST(@IdConsorcio AS VARCHAR(10)) + ' generada correctamente para mes: ' + CAST(@Mes AS VARCHAR(2));
 
+	UPDATE f
+	SET f.IdExpensa = e.IdExpensa
+	FROM tpo.Factura f
+	INNER JOIN tpo.Expensa e 
+	ON tpo.f_mesANumero(f.Mes) = e.Mes
+	AND f.NombreConsorcio = e.IdConsorcio;
+
+
 	END TRY
 	BEGIN CATCH
 		PRINT 'Mensaje de Error de Expensa: ' + ERROR_MESSAGE();
@@ -150,8 +158,8 @@ begin
 	--HAY QUE BUSCAR EL ID DE LA EXPENSA QUE SE ACABA DE GENERAR
 	DECLARE @IdExpensa INT = (select e.IdExpensa from tpo.Expensa e where e.Mes = @Mes); ---expensa del mes que elegimos crear
 	SET @FechaGenMesAnterior =  tpo.f_obtenerQuintoDiaHabil(@Anio,@MesAnterior);
-	SET @FechaVTO1 = DATEADD(day,5,@FechaGeneracion);
-	SET @FechaVTO2 = DATEADD(day,5,@FechaVTO1);
+	SET @FechaVTO1 = DATEADD(day,10,@FechaGeneracion);
+	SET @FechaVTO2 = DATEADD(day,10,@FechaVTO1);
 
 
 	--CALCULOS POR CADA UNIDAD FUNCIONAL
@@ -248,15 +256,24 @@ begin
 	where u.IdConsorcio = @IdConsorcio
 
 	PRINT 'DetalleExpensa generado. IdExpensa = ' + CAST(@IdExpensa AS VARCHAR(10));
+
+	UPDATE pg
+	SET pg.IdDetalleExp = de.IdDetalle
+	FROM tpo.Pago pg
+	INNER JOIN tpo.DetalleExpensa de 
+    ON pg.IdUf = de.IdUf
+    AND de.IdExpensa = @IdExpensa
+	WHERE pg.IdDetalleExp IS NULL;
+
 	END TRY
 	BEGIN CATCH
 		PRINT 'Mensaje de error DetalleExpensa: ' + ERROR_MESSAGE();
-		PRINT 'Número de Error:  ' + CAST(ERROR_NUMBER() AS VARCHAR);
-		PRINT 'Línea del Error:  ' + CAST(ERROR_LINE() AS VARCHAR);
-		PRINT 'Procedimiento:    ' + ISNULL(ERROR_PROCEDURE(), 'No estaba dentro de un SP (falló el script principal)');
+		PRINT 'NÃºmero de Error:  ' + CAST(ERROR_NUMBER() AS VARCHAR);
+		PRINT 'LÃ­nea del Error:  ' + CAST(ERROR_LINE() AS VARCHAR);
+		PRINT 'Procedimiento:    ' + ISNULL(ERROR_PROCEDURE(), 'No estaba dentro de un SP (fallÃ³ el script principal)');
 		return -1;
 	END CATCH
     SET NOCOUNT OFF;
-	
+
 end
 go
