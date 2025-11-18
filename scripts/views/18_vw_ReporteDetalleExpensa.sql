@@ -1,3 +1,14 @@
+/*
+Este script crea la vista para a partir de ella generar el csv de salida del Detalle Expensa.
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 CREATE OR ALTER VIEW tpo.vw_ReporteDetalleExpensa
 AS
 SELECT              
