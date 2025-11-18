@@ -1,3 +1,14 @@
+/*
+Este script crea los tipos de personas indicando 1 si es propietario o 0 si es inquilino.
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 CREATE OR ALTER PROCEDURE tpo.sp_cargarTipoPersona
     @IdTipo CHAR(1),
     @Descripcion CHAR(12)
