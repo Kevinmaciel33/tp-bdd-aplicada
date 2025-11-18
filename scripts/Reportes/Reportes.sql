@@ -183,9 +183,13 @@ BEGIN
 	CLOSE SYMMETRIC KEY ClaveTP;
 	END TRY
 	BEGIN CATCH
-		IF (SELECT key_guid FROM sys.open_keys WHERE key_name = 'ClaveTP') IS NOT NULL
-            CLOSE SYMMETRIC KEY ClaveTP;
-			
+		IF EXISTS (
+			SELECT 1 
+			FROM sys.openkeys 
+			WHERE key_name = 'ClaveTP'
+		)
+			CLOSE SYMMETRIC KEY ClaveTP;
+
 		PRINT 'ERROR en sp_reporte_top3_morosidad:'
 		PRINT ERROR_MESSAGE();
 		THROW;
