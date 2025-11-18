@@ -210,6 +210,8 @@ GO
 PRINT 'Creando VIEWS...';
 GO
 :r "C:\tp-bdd-aplicada\scripts\views\vw_ReporteDetalleExpensa.sql"
+GO
+:r "C:\tp-bdd-aplicada\scripts\views\vw_ReporteExpensa.sql"
 PRINT '...VIEWS creados.';
 GO 
 
