@@ -59,11 +59,11 @@ GO
 -- Reporte 5: propietarios
 IF NOT EXISTS (
     SELECT 1 FROM sys.indexes 
-    WHERE name = 'IX_UnidadFuncional_IdPropietario' 
+    WHERE name = 'IX_UnidadFuncional_Cuenta' 
       AND object_id = OBJECT_ID('tpo.UnidadFuncional')
 )
 BEGIN
-    CREATE INDEX IX_UnidadFuncional_IdPropietario ON tpo.UnidadFuncional(IdPropietario);
+    CREATE INDEX IX_UnidadFuncional_Cuenta ON tpo.UnidadFuncional(Cuenta);
 END
 GO
 
@@ -99,6 +99,7 @@ BEGIN
     CREATE INDEX IX_DetalleExpensa_IdUf_Fecha ON tpo.DetalleExpensa(IdUf);
 END
 GO
+
 
 
 
