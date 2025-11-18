@@ -1,5 +1,5 @@
-DROP TRIGGER [tpo].[cifrarDatosPersonales]
-go
+DROP TRIGGER IF EXISTS [tpo].[cifrarDatosPersonales];
+GO
 
 CREATE OR ALTER TRIGGER [tpo].[cifrarDatosPersonales]
 ON [tpo].[Persona]
