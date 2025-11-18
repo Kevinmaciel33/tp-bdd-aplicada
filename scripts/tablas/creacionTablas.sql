@@ -130,8 +130,8 @@ IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE
 BEGIN
 	CREATE TABLE tpo.Factura (
 	IdFactura INT NOT NULL IDENTITY(1,1),
-	IdExpensa INT NOT NULL,
-	IdServicio INT NOT NULL,
+	IdExpensa INT NULL,
+	IdServicio INT NULL,
 	NombreConsorcio VARCHAR(20) NULL, --Aclarar el nombre del consorcio aunque no sea FK
 	Mes VARCHAR(10) NOT NULL,
 	Detalle VARCHAR(50) NULL, --BANCARIOS
@@ -156,7 +156,6 @@ BEGIN
 	IdDetalle INT IDENTITY(1,1),
 	IdExpensa INT NOT NULL,
 	IdUf INT,
-	--TipoGasto CHAR(1) NOT NULL,  -- O=Ordinario, E=Extraordinario 
 	Porcentaje DECIMAL(5,2) NOT NULL ,
 	SaldoAnterior DECIMAL(12,2),
 	PagosRecibidos DECIMAL(12,2),
@@ -182,15 +181,13 @@ BEGIN
 	CREATE TABLE tpo.Pago (
 	IdPago INT NOT NULL,
 	IdDetalleExp INT NULL,
-	--IdUf INT NULL,
-	--MesPago INT NOT NULL,
+	IdUf INT NULL,
 	FechaPago DATE NOT NULL, 
 	Cuenta varchar(22) NOT NULL,
 	Importe DECIMAL(10,2) NOT NULL,
 
 	CONSTRAINT Pk_Pago PRIMARY KEY (IdPago),
 	CONSTRAINT Fk_Pago_DetalleExp FOREIGN KEY (IdDetalleExp) REFERENCES tpo.DetalleExpensa(IdDetalle),
-	--CONSTRAINT Fk_Pago_Uf FOREIGN KEY (IdUf) REFERENCES tpo.UnidadFuncional(IdUf),
 	CONSTRAINT Ck_Importe CHECK (Importe > 0)
 	);
 END
