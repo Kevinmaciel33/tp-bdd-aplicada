@@ -104,7 +104,7 @@ BEGIN TRY
 
     -- Paso 6
     PRINT 'Cargando Gastos Ordinarios...';
-    EXEC tpo.sp_cargarGastosOrdinarios 'C:\tp-bdd-aplicada\archivos_a_importar\Servicios.Servicios.json';
+    EXEC tpo.sp_cargarGastos 'C:\tp-bdd-aplicada\archivos_a_importar\Servicios.Servicios.json';
     PRINT '... Gastos Ordinarios cargados.';
 
     -- Paso 7
