@@ -84,8 +84,6 @@ BEGIN
 	CONSTRAINT Pk_IdUf PRIMARY KEY(IdUf),
 	CONSTRAINT Ck_NroUf CHECK(NroUf>0),
 	CONSTRAINT Ck_M2_Uf CHECK(M2>0),
-	constraint fk_Propietario foreign key (IdPropietario) references tpo.Persona (DNI),
-	constraint fk_Inquilino foreign key (IdInquilino) references tpo.Persona (DNI),
 	CONSTRAINT Fk_Consorcio_UF FOREIGN KEY(IdConsorcio) REFERENCES tpo.Consorcio (IdConsorcio)
 	);
 END
