@@ -1,3 +1,14 @@
+/*
+Este script carga a la base de datos las personas con sus datos e indica propietario o inquilino.
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 DROP FUNCTION IF EXISTS tpo.corregirTexto;
 GO
 
@@ -7,10 +18,8 @@ AS
 BEGIN
     DECLARE @resultado VARCHAR(50);
 
-    -- Quitar espacios al inicio y al final
     SET @resultado = LTRIM(RTRIM(@texto));
 
-    -- Reemplazar ñ y tildes
     SET @resultado = REPLACE(@resultado, 'ñ', 'n');
     SET @resultado = REPLACE(@resultado, 'á', 'a');
     SET @resultado = REPLACE(@resultado, 'é', 'e');
@@ -23,7 +32,6 @@ BEGIN
     SET @resultado = REPLACE(@resultado, 'Ó', 'O');
     SET @resultado = REPLACE(@resultado, 'Ú', 'U');
 
-    -- Email → minúsculas y sin espacios internos
     IF CHARINDEX('@', @resultado) > 0
     BEGIN
         SET @resultado = REPLACE(@resultado, ' ', '');
@@ -109,7 +117,6 @@ BEGIN
             telefono_csv AS telefono,
             cvu_cbu_csv AS cuenta,
 
-            -- tipo_inquilino_csv → FK en TipoPersona ('0'=propietario, '1'=inquilino)
             CASE 
 			WHEN TRIM(tipo_inquilino_csv) LIKE '%1%' THEN '1'
 			ELSE '0'
