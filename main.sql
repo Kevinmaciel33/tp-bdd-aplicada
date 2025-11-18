@@ -56,7 +56,7 @@ go
 go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarPagos.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarGastosOrd.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarGastos.sql"
 go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilino-PropietarioUF.sql"
 go
