@@ -1,4 +1,14 @@
---verifica si existe la tabla
+/*
+Este script verifica si existen las tablas sino las crea.
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
 	TABLE_SCHEMA = 'tpo' AND TABLE_NAME = 'Consorcio')
 BEGIN
