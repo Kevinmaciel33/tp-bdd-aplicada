@@ -212,8 +212,9 @@ GO
 :r "C:\tp-bdd-aplicada\scripts\views\18_vw_ReporteDetalleExpensa.sql"
 GO
 :r "C:\tp-bdd-aplicada\scripts\views\19_vw_ReporteExpensa.sql"
-PRINT '...VIEWS creados.';
 GO 
+PRINT '...VIEWS creados.';
+
 
 --CREAMOS LOS ROLES
 PRINT 'Creando los roles y permisos...';
