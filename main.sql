@@ -62,6 +62,10 @@ go
 go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilino-PropietarioUF.sql"
 go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\asociarPagos.sql"
+go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\pruebaGenerarExpensa.sql"
+go
 PRINT '...Stored Procedures creados.';
 GO
 
@@ -111,6 +115,10 @@ BEGIN TRY
     EXEC tpo.sp_agregarCuentasUF 'C:\tp-bdd-aplicada\archivos_a_importar\Inquilino-propietarios-UF.csv';
     PRINT '... Cuentas UF agregadas.';
 
+	PRINT 'Asociando pagos...';
+    EXEC tpo.sp_asociarPagos;
+    PRINT '... pagos asociados.';
+
     COMMIT TRANSACTION CargaDatos;
     
     PRINT '==================================================';
@@ -136,6 +144,20 @@ BEGIN CATCH
     PRINT 'Todos los cambios han sido revertidos (ROLLBACK).';
     PRINT 'La base de datos está limpia.';
 
+END CATCH
+GO
+-----GENERAR EXPENSA-----
+
+BEGIN TRANSACTION CargaExpensa;
+BEGIN TRY
+	EXEC tpo.sp_generarExpensa 6,2025,1 ---Mes de la expensa q se quiere generar, año, id del consorcio
+	PRINT 'TODO OK'
+
+END TRY
+BEGIN CATCH
+	IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION CargaExpensa;
+	print 'ERROR: ' + error_message();
 END CATCH
 GO
 
