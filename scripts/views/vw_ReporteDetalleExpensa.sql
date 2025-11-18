@@ -10,11 +10,11 @@ SELECT
     CONVERT(VARCHAR(MAX), DECRYPTBYKEY(p.Apellido)) AS Propietario,
 	
 	de.SaldoAnterior AS [Saldo Anterior Abonado],
-	de.PagosRecibidos AS [Pagos Recibidos],
+	de.PagosRecibidos AS [Pagos_Recibidos],
 	de.Deuda,
-	de.InteresesMora AS [Interés por Mora],
-	de.TotalOrd AS [Expensas Ordinarias],
-	de.TotalExt AS [Expensas Extraordinarias],
+	de.InteresesMora AS [Interes_Mora],
+	de.TotalOrd AS [Expensas_Ordinarias],
+	de.TotalExt AS [Expensas_Extraordinarias],
 
     COALESCE(
         (SELECT COUNT(*) FROM tpo.EspacioExtra WHERE IdUf = uf.IdUf AND TipoEspacio = 'Cochera'), 0
