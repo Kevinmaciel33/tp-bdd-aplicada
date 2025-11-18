@@ -7,9 +7,7 @@ BEGIN
 	Nombre VARCHAR(100) NOT NULL,
 	Direccion VARCHAR(120) NOT NULL,
 	Unidades INT NOT NULL,
-	M2total DECIMAL(10,2) NOT NULL,
-	CuentaAysa CHAR(6),
-	CuentaEdenor CHAR(10)
+	M2total DECIMAL(10,2) NOT NULL
 
 	CONSTRAINT Pk_Consorcio  PRIMARY KEY(IdConsorcio),
 	CONSTRAINT CK_M2 CHECK(M2total>0)
@@ -76,8 +74,6 @@ BEGIN
 	CREATE TABLE tpo.UnidadFuncional (
 	IdUf INT NOT NULL IDENTITY(1,1),
 	IdConsorcio INT NOT NULL,
-	IdPropietario INT NULL,
-	IdInquilino INT NULL,
 	NroUf INT NOT NULL,
 	Cuenta VARCHAR(50) NULL,
 	Piso VARCHAR(2) NOT NULL,
