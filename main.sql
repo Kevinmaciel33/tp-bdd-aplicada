@@ -60,6 +60,8 @@ go
 go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarGastos.sql"
 go
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarGastosExt.sql"
+go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilino-PropietarioUF.sql"
 go
 :r "C:\tp-bdd-aplicada\scripts\store_procedures\asociarPagos.sql"
@@ -109,6 +111,10 @@ BEGIN TRY
     PRINT 'Cargando Gastos Ordinarios...';
     EXEC tpo.sp_cargarGastos 'C:\tp-bdd-aplicada\archivos_a_importar\Servicios.Servicios.json';
     PRINT '... Gastos Ordinarios cargados.';
+
+	PRINT 'Cargando Gastos EXT...';
+    EXEC tpo.sp_cargarGastosExt 'C:\tp-bdd-aplicada\archivos_a_importar\gastosExt.json';
+    PRINT '... Gastos EXT cargados.';
 
     -- Paso 7
     PRINT 'Agregando Cuentas UF...';
