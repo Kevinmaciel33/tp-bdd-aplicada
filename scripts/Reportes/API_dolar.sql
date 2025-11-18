@@ -1,5 +1,6 @@
 --Habilitamos acceso a datos externos
 --API DOLAR
+DROP TABLE IF EXISTS tpo.cotizacion_dolar;
 
 CREATE TABLE tpo.cotizacion_dolar (
     id INT IDENTITY(1,1) PRIMARY KEY,
