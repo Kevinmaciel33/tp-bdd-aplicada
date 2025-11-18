@@ -27,46 +27,46 @@ GO
 --:WHENEVER SQLERROR EXIT -1 
 --ACTIVAR 'SQLCMD Mode' desde la opcion "Query" en la barra
 PRINT 'Ejecutando script de TABLAS...';
-:r "C:\tp-bdd-aplicada\scripts\tablas\creacionTablas.sql"
+:r "C:\tp-bdd-aplicada\scripts\tablas\00_creacionTablas.sql"
 PRINT '...Tablas creadas.';
 GO 
 
 --CREAMOS LAS CLAVES DE ENCRIPTADO
 PRINT 'Creando la clave de cifrado...';
 GO
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarClaveEncriptado.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\01_cargarClaveEncriptado.sql"
 
 --CREAMOS LOS TRIGGER
 PRINT 'Creando Triggers...';
 GO
-:r "C:\tp-bdd-aplicada\scripts\triggers\cifrarDatosPersonales.sql"
+:r "C:\tp-bdd-aplicada\scripts\triggers\02_cifrarDatosPersonales.sql"
 PRINT '...Triggers creados.';
 GO 
 
 --CREAMOS LOS SP
 PRINT 'Creando Stored Procedures...';
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarTipoPersona.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\03_cargarTipoPersona.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilinoPropietario.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\04_cargarInquilinoPropietario.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarConsorcios.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\05_cargarConsorcios.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarUnidadesFuncionales.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\06_cargarUnidadesFuncionales.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarProveedores.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\07_cargarProveedores.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarPagos.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\08_cargarPagos.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarGastos.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\09_cargarGastos.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarGastosExt.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\10_cargarGastosExt.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\cargarInquilino-PropietarioUF.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\11_cargarInquilino-PropietarioUF.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\asociarPagos.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\12_asociarPagos.sql"
 go
-:r "C:\tp-bdd-aplicada\scripts\store_procedures\pruebaGenerarExpensa.sql"
+:r "C:\tp-bdd-aplicada\scripts\store_procedures\13_pruebaGenerarExpensa.sql"
 go
 PRINT '...Stored Procedures creados.';
 GO
@@ -169,21 +169,21 @@ GO
 
 PRINT 'Creando Reportes...';
 GO
-:r "C:\tp-bdd-aplicada\scripts\reportes\reportes.sql"
+:r "C:\tp-bdd-aplicada\scripts\reportes\14_reportes.sql"
 GO
 PRINT '...Reportes creados.';
 GO
 
 PRINT 'Creando índices de reportes...';
 GO
-:r "C:\tp-bdd-aplicada\scripts\reportes\reportes_indices.sql"
+:r "C:\tp-bdd-aplicada\scripts\reportes\15_reportes_indices.sql"
 GO
 PRINT '...Índices creados.';
 GO
 
 PRINT 'Ejecución de reportes...';
 GO
-:r "C:\tp-bdd-aplicada\scripts\reportes\reportes_ejecucion.sql"
+:r "C:\tp-bdd-aplicada\scripts\reportes\16_reportes_ejecucion.sql"
 GO
 PRINT '==================================================';
 PRINT 'Reportes ejecutados correctamente.';
@@ -192,7 +192,7 @@ GO
 
 PRINT 'Creando API de cotización del dólar...';
 GO
-:r "C:\tp-bdd-aplicada\scripts\reportes\API_dolar.sql"
+:r "C:\tp-bdd-aplicada\scripts\reportes\17_API_dolar.sql"
 GO
 PRINT '...API creada correctamente.';
 GO
@@ -209,13 +209,13 @@ GO
 --CREAMOS LAS VIEWS
 PRINT 'Creando VIEWS...';
 GO
-:r "C:\tp-bdd-aplicada\scripts\views\vw_ReporteDetalleExpensa.sql"
+:r "C:\tp-bdd-aplicada\scripts\views\18_vw_ReporteDetalleExpensa.sql"
 GO
-:r "C:\tp-bdd-aplicada\scripts\views\vw_ReporteExpensa.sql"
+:r "C:\tp-bdd-aplicada\scripts\views\19_vw_ReporteExpensa.sql"
 PRINT '...VIEWS creados.';
 GO 
 
 --CREAMOS LOS ROLES
 PRINT 'Creando los roles y permisos...';
 go
-:r "C:\tp-bdd-aplicada\scripts\roles_permisos\permisos.sql"
+:r "C:\tp-bdd-aplicada\scripts\roles_permisos\20_permisos.sql"
