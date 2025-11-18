@@ -1,3 +1,14 @@
+/*
+Este script carga las unidades funcionales a la base de datos y espacio extra (baulera/cochera) si corresponde.
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 CREATE OR ALTER PROCEDURE [tpo].[sp_cargarUnidadesFuncionales]
     @RutaArchivoTXT NVARCHAR(255)
 AS
@@ -7,7 +18,6 @@ BEGIN
     DECLARE @BulkInsertSQL NVARCHAR(MAX);
     DECLARE @ExisteArchivo INT;
 
-    -- 1. Verificar si el archivo existe
     EXEC master.dbo.xp_fileexist @RutaArchivoTXT, @ExisteArchivo OUTPUT;
     IF @ExisteArchivo = 0
     BEGIN
