@@ -1,19 +1,19 @@
 ---TP BDA
 ---Creacion de bd, esquemas, tablas y sp
 
-IF NOT EXISTS ( SELECT name FROM sys.databases WHERE name = 'BDDATP')
+IF NOT EXISTS ( SELECT name FROM sys.databases WHERE name = 'Com2900G10')
 BEGIN
-    PRINT 'Creando la base de datos BDDATP...';
-    CREATE DATABASE BDDATP
+    PRINT 'Creando la base de datos Com2900G10...';
+    CREATE DATABASE Com2900G10
     COLLATE Modern_Spanish_CI_AS; -- Latin1_General_CI_AI;
 END
 ELSE
 BEGIN
-    PRINT 'La base de datos BDDATP ya existe.';
+    PRINT 'La base de datos Com2900G10 ya existe.';
 END
 GO
 
-use BDDATP
+use Com2900G10
 go
 
 --verifica si existe el esquema

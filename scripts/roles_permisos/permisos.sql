@@ -1,4 +1,4 @@
-USE BDDATP;
+USE Com2900G10;
 GO
 
 PRINT 'Limpiando roles antiguos...';
