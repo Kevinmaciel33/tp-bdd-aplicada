@@ -172,7 +172,7 @@ BEGIN
             SUM(ISNULL(pg.Importe,0)) AS TotalPagos,
             SUM(ISNULL(de.Total,0)) - SUM(ISNULL(pg.Importe,0)) AS Deuda
         FROM tpo.UnidadFuncional uf
-        INNER JOIN tpo.Persona per ON uf.Cuenta = per.Cuenta
+        INNER JOIN tpo.Persona per ON uf.Cuenta = CONVERT(VARCHAR(MAX), DECRYPTBYKEY(per.Cuenta))
         LEFT JOIN tpo.DetalleExpensa de ON uf.IdUf = de.IdUf
         LEFT JOIN tpo.Pago pg ON de.IdDetalle = pg.IdDetalleExp
         GROUP BY per.DNI, per.Nombre, per.Apellido, per.Email, per.Telefono
