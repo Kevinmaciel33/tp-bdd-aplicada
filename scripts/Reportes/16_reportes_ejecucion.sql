@@ -1,5 +1,14 @@
 --INVOCACIÓN A LOS SP DE REPORTES
-
+/*
+18/11/2025
+Com2900G10
+Grupo 10
+Bases de datos aplicadas
+Integrantes:
+-Kevin Maciel
+-Marcos kouvach
+-Agostina salas
+-Keila Álvarez Da Silva*/
 -- Reporte 1
 EXEC tpo.sp_reporte_flujo_caja 
     @FechaInicio = '2025-01-01', 
